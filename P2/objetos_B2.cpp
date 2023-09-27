@@ -19,11 +19,10 @@ _puntos3D::_puntos3D()
 
 void _puntos3D::draw_puntos(float r, float g, float b, int grosor)
 {
-    int i;
     glPointSize(grosor);
     glColor3f(r, g, b);
     glBegin(GL_POINTS);
-    for (i = 0; i < vertices.size(); i++)
+    for (unsigned i = 0; i < vertices.size(); i++)
     {
         glVertex3fv((GLfloat *)&vertices[i]);
     }
@@ -58,12 +57,11 @@ _vertex3f _triangulos3D::color_aleatorio()
 
 void _triangulos3D::draw_aristas(float r, float g, float b, int grosor)
 {
-    int i;
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glLineWidth(grosor);
     glColor3f(r, g, b);
     glBegin(GL_TRIANGLES);
-    for (i = 0; i < caras.size(); i++)
+    for (unsigned i = 0; i < caras.size(); i++)
     {
         glVertex3fv((GLfloat *)&vertices[caras[i]._0]);
         glVertex3fv((GLfloat *)&vertices[caras[i]._1]);
@@ -261,7 +259,17 @@ void _objeto_ply::parametros(char *archivo)
     printf("Number of vertices=%d\nNumber of faces=%d\n", n_ver, n_car);
 
     vertices.resize(n_ver);
+    for (unsigned i = 0; i < n_ver; i++) {
+        vertices[i] = _vertex3f(ver_ply[i*3], ver_ply[i*3+1], ver_ply[i*3+2]);
+    }
+
     caras.resize(n_car);
+    for (unsigned i = 0; i < n_car; i++) {
+        caras[i] = _vertex3i(car_ply[i*3], car_ply[i*3+1], car_ply[i*3+2]);
+    }
+
+    colores.resize(caras.size());
+    colorear_caras_aleatorio();
 }
 
 //************************************************************************
@@ -301,6 +309,10 @@ void _rotacion::parametros(vector<_vertex3f> perfil, int num)
     // tapa inferior
 
     // tapa superior
+
+    colores.resize(caras.size());
+    colorear_caras_aleatorio();
+
 }
 
 //************************************************************************
@@ -341,4 +353,7 @@ _extrusion::_extrusion(vector<_vertex3f> poligono, float x, float y, float z)
         caras[c]._2 = i * 2 + 1;
         c = c + 1;
     }
+
+    colores.resize(caras.size());
+    colorear_caras_aleatorio();
 }
