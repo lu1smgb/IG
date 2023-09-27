@@ -86,7 +86,7 @@ void _triangulos3D::draw_solido(float r, float g, float b)
 // dibujar en modo sólido con colores diferentes para cada cara
 //*************************************************************************
 
-void _triangulos3D::colorear_caras()
+void _triangulos3D::colorear_caras_aleatorio()
 {
 	// Establecemos la semilla aleatoria
 	srand((unsigned)time(NULL));
@@ -144,7 +144,7 @@ _cubo::_cubo(float tam)
 	caras[11] = _vertex3i(6, 7, 4);
 
 	colores.resize(caras.size());
-	colorear_caras();
+	colorear_caras_aleatorio();
 }
 
 //*************************************************************************
@@ -171,6 +171,36 @@ _piramide::_piramide(float tam, float al)
 	caras[5]._0 = 3; caras[5]._1 = 2; caras[5]._2 = 1;
 
 	colores.resize(caras.size());
-	colorear_caras();
+	colorear_caras_aleatorio();
 
+}
+
+//*************************************************************************
+// clase octaedro
+//*************************************************************************
+
+_octaedro::_octaedro(float tam, float al) {
+
+	// vertices
+	vertices.resize(6);
+	vertices[0] = _vertex3f( 0,   0,  1) * tam;
+	vertices[1] = _vertex3f( 1,   0,  0) * tam;
+	vertices[2] = _vertex3f( 0,   0, -1) * tam;
+	vertices[3] = _vertex3f(-1,   0,  0) * tam;
+	vertices[4] = _vertex3f( 0,  al,  0) * tam;
+	vertices[5] = _vertex3f( 0, -al,  0) * tam;
+
+	// caras
+	caras.resize(8);
+	caras[0] = _vertex3i(5, 1, 0);
+	caras[1] = _vertex3i(5, 2, 1);
+	caras[2] = _vertex3i(5, 3, 2);
+	caras[3] = _vertex3i(5, 0, 3);
+	caras[4] = _vertex3i(1, 4, 0);
+	caras[5] = _vertex3i(2, 4, 1);
+	caras[6] = _vertex3i(3, 4, 2);
+	caras[7] = _vertex3i(0, 4, 3);
+
+	colores.resize(caras.size());
+	colorear_caras_aleatorio();
 }

@@ -32,7 +32,7 @@ class _triangulos3D : public _puntos3D
 {
 protected:
 	_vertex3f color_aleatorio();
-	void colorear_caras();
+	void colorear_caras_aleatorio();
 public:
 	_triangulos3D();
 	void draw_aristas(float r, float g, float b, int grosor);
@@ -61,4 +61,14 @@ class _piramide : public _triangulos3D
 {
 public:
 	_piramide(float tam = 0.5, float al = 1.0);
+};
+
+//*************************************************************************
+// clase ???
+//*************************************************************************
+
+class _octaedro: public _triangulos3D
+{
+public:
+	_octaedro(float tam = 0.5, float al = 1.0);
 };

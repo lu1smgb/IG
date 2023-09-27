@@ -8,6 +8,11 @@
 ![Práctica 0](img/p0.png)
 
 ## Práctica 1 - Visualización de objetos 3D sencillos
-**Objetivo**: Implementar un cubo y el coloreado aleatorio de las caras de una figura 3D cualquiera
+**Objetivo**: Implementar un cubo, otra figura (octaedro) y el coloreado aleatorio de las caras de una figura 3D cualquiera
 
-![Práctica 1](img/p1.png)
+![Práctica 1 - Cubo](img/p1_0.png)
+![Práctica 1 - Octaedro](img/p1_1.png)
+
+## Práctica 2 - Modelos PLY y poligonales
+
+*En progreso*

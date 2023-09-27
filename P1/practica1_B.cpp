@@ -28,6 +28,7 @@ int UI_window_pos_x = 50, UI_window_pos_y = 50, UI_window_width = 450, UI_window
 
 _piramide piramide(0.8, 1.3);
 _cubo cubo(0.6);
+_octaedro octaedro(1);
 
 //**************************************************************************
 //
@@ -104,7 +105,11 @@ void draw_objects()
     // cubo.draw_puntos(0, 0.6, 1, 4);
     // cubo.draw_aristas(0, 0.6, 1, 4);
     // cubo.draw_solido(0, 0.6, 1);
-    cubo.draw_solido_colores();
+    // cubo.draw_solido_colores();
+    // octaedro.draw_puntos(0, 0.6, 1, 4);
+    // octaedro.draw_aristas(0, 0.6, 1, 4);
+    // octaedro.draw_solido(0, 0.6, 1);
+    octaedro.draw_solido_colores();
 }
 
 //**************************************************************************
