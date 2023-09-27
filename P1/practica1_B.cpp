@@ -75,7 +75,13 @@ void change_observer()
 
 void draw_axis()
 {
+    /**
+     * Al dibujar las aristas de una figura, hay que reestablecer el
+     * grosor de las líneas, si no, los ejes tendrán un grosor igual
+     * al de las aristas
+    */
     glLineWidth(1);
+
     glBegin(GL_LINES);
     // eje X, color rojo
     glColor3f(1, 0, 0);
