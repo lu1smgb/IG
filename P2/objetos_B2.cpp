@@ -94,6 +94,7 @@ void _triangulos3D::draw_solido(float r, float g, float b)
 
 void _triangulos3D::colorear_caras_aleatorio()
 {
+    colores.resize(caras.size());
     // Establecemos la semilla aleatoria
     srand((unsigned)time(NULL));
     for (unsigned int i = 0; i < colores.size(); i++)
@@ -172,7 +173,6 @@ _cubo::_cubo(float tam)
     caras[10] = _vertex3i(4, 5, 6);
     caras[11] = _vertex3i(6, 7, 4);
 
-    colores.resize(caras.size());
     colorear_caras_aleatorio();
 }
 
@@ -199,7 +199,6 @@ _piramide::_piramide(float tam, float al)
 	caras[4]._0 = 3; caras[4]._1 = 1; caras[4]._2 = 0;
 	caras[5]._0 = 3; caras[5]._1 = 2; caras[5]._2 = 1;
 
-	colores.resize(caras.size());
 	colorear_caras_aleatorio();
 
 }
@@ -231,7 +230,6 @@ _octaedro::_octaedro(float tam, float al)
     caras[6] = _vertex3i(3, 4, 2);
     caras[7] = _vertex3i(0, 4, 3);
 
-    colores.resize(caras.size());
     colorear_caras_aleatorio();
 }
 
@@ -239,14 +237,10 @@ _octaedro::_octaedro(float tam, float al)
 // clase objeto ply
 //*************************************************************************
 
-_objeto_ply::_objeto_ply()
-{
-    // leer lista de coordenadas de vértices y lista de indices de vértices
-}
+_objeto_ply::_objeto_ply() {}
 
-void _objeto_ply::parametros(char *archivo)
-{
-    int n_ver, n_car;
+void _objeto_ply::parametros(char *archivo) {
+    unsigned n_ver, n_car;
 
     vector<float> ver_ply;
     vector<int> car_ply;
@@ -256,7 +250,7 @@ void _objeto_ply::parametros(char *archivo)
     n_ver = ver_ply.size() / 3;
     n_car = car_ply.size() / 3;
 
-    printf("Number of vertices=%d\nNumber of faces=%d\n", n_ver, n_car);
+    // printf("Number of vertices=%d\nNumber of faces=%d\n", n_ver, n_car);
 
     vertices.resize(n_ver);
     for (unsigned i = 0; i < n_ver; i++) {
@@ -268,7 +262,6 @@ void _objeto_ply::parametros(char *archivo)
         caras[i] = _vertex3i(car_ply[i*3], car_ply[i*3+1], car_ply[i*3+2]);
     }
 
-    colores.resize(caras.size());
     colorear_caras_aleatorio();
 }
 
@@ -276,44 +269,255 @@ void _objeto_ply::parametros(char *archivo)
 // objeto por revolucion
 //************************************************************************
 
-_rotacion::_rotacion()
-{
+_rotacion::_rotacion() {};
+
+// Intercambia dos tuplas de tamaño 3 de cualquier tipo de dato
+template <class T>
+void swap_vertex(_vertex3<T> &a, _vertex3<T> &b) {
+    _vertex3<T> aux = a;
+    a = b;
+    b = aux;
 }
 
-void _rotacion::parametros(vector<_vertex3f> perfil, int num)
-{
-    int i, j;
+/**
+ * Ordena un conjunto de vértices según su coordenada Y en orden descendente
+ * Utiliza el algoritmo de ordenación por burbuja
+*/
+void _rotacion::ordenar_perfil(vector<_vertex3f> &perfil) {
+
+    for (unsigned i = 0; i < perfil.size() - 1; i++) {
+        for (unsigned j = 0; j < perfil.size() - i - 1; j++) {
+            _vertex3f &a = perfil[j];
+            _vertex3f &b = perfil[j+1];
+            if (a.y < b.y) {
+                swap_vertex(a, b);
+            }
+        }
+    }
+
+}
+// Genera un poligono por revolucion a partir del perfil y de un numero positivo de revoluciones
+void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num) {
+
+    // Ordenamos el perfil proporcionado según su coordenada Y en orden descendente
+    ordenar_perfil(perfil);
+    
+    // ***** Vertices *****
+    // Num de vertices = Num de vertices del perfil * Num de revoluciones
+    unsigned tam_perfil = perfil.size();
+    unsigned num_vertices = tam_perfil * num;
+    vertices.resize(num_vertices);
+
+    // Generamos los vertices
     _vertex3f vertice_aux;
-    _vertex3i cara_aux;
-    int num_aux;
-
-    // tratamiento de los vértice
-
-    num_aux = perfil.size();
-    vertices.resize(num_aux * num);
-    for (j = 0; j < num; j++)
+    for (unsigned j = 0; j < num; j++)
     {
-        for (i = 0; i < num_aux; i++)
+        for (unsigned i = 0; i < tam_perfil; i++)
         {
             vertice_aux.x = perfil[i].x * cos(2.0 * M_PI * j / (1.0 * num)) +
                             perfil[i].z * sin(2.0 * M_PI * j / (1.0 * num));
             vertice_aux.z = -perfil[i].x * sin(2.0 * M_PI * j / (1.0 * num)) +
                             perfil[i].z * cos(2.0 * M_PI * j / (1.0 * num));
             vertice_aux.y = perfil[i].y;
-            vertices[i + j * num_aux] = vertice_aux;
+            vertices[i + j * tam_perfil] = vertice_aux;
         }
     }
 
-    // tratamiento de las caras
+    // ***** Caras longitudinales *****
+    // Generación de las caras longitudinales
+    // Cada iteración de este bucle genera todas las caras de una sección del polígono
+    for (unsigned i = 0; i < num; i++) {
+        // Cada iteracion de este bucle genera las caras en una sección del perfil
+        for (unsigned j = 0; j < tam_perfil - 1; j++) {
+            /**
+             * Cara de indice par (cara superior):
+             * x = superior der
+             * y = superior izq % V
+             * z = inferior izq % V
+            */
+            caras.push_back(_vertex3i(
+                tam_perfil * i + j, 
+               (tam_perfil * (i + 1) + j) % num_vertices, 
+               (tam_perfil * (i + 1) + (j + 1)) % num_vertices));
+            /**
+             * Cara de indice impar (inferior):
+             * x = inferior izq % V = z(superior)
+             * y = inferior der
+             * z = superior der = x(superior)
+            */
+            caras.push_back(_vertex3i(
+               (tam_perfil * (i + 1) + (j + 1)) % num_vertices,
+                tam_perfil * i + j,
+                tam_perfil * i + j + 1));
+        }
+    }
 
-    // tapa inferior
+    // ***** Tapas *****
+    // Generamos los vertices que necesitaremos para su generacion y los
+    // incluimos con el resto de vertices
+    // En caso de que ya esten incluidos en el perfil (X aprox. 0), los anadimos directamente
+    // en caso contrario, los generamos a partir del primero y el ultimo modificando la coordenada X
+    _vertex3f v_superior;
+    _vertex3f v_inferior;
+    _vertex3f &primero = perfil[0];
+    _vertex3f &ultimo = perfil[tam_perfil - 1];
+    if (abs(primero.x) < _0) {
+        v_superior = primero;
+    }
+    else {
+        v_superior = _vertex3f(0, primero.y, 0);
+    }
+    if (abs(ultimo.x) < _0) {
+        v_inferior = ultimo;
+    }
+    else {
+        v_inferior = _vertex3f(0, ultimo.y, 0);
+    }
+    vertices.push_back(v_superior);
+    vertices.push_back(v_inferior);
 
-    // tapa superior
+    // Generacion de la tapa superior
+    for (unsigned i = 0; i < num; i++) {
+        // La variable num_vertices no varia, pero num_vertices != vertices.size()
+        /**
+         * Cara superior (vista desde arriba):
+         * x = v_superior
+         * y = superior der
+         * z = superior izq (0)
+        */
+        _vertex3i cara(
+            num_vertices,
+            (tam_perfil * (i + 1)) % num_vertices,
+            tam_perfil * i);
+        caras.push_back(cara);
+    }
 
-    colores.resize(caras.size());
+    // Generacion de la tapa inferior
+    for (unsigned i = 0; i < num; i++) {
+        /**
+         * Cara inferior (vista desde abajo):
+         * x = v_inferior
+         * y = inferior der
+         * z = inferior izq (0)
+        */
+        _vertex3i cara(
+            num_vertices + 1,
+            ((tam_perfil - 1) + tam_perfil * (i + 1)) % num_vertices,
+            ((tam_perfil - 1) + tam_perfil * i) % num_vertices);
+        caras.push_back(cara);
+    }
+
+    // Finalmente asignamos un color a cada cara
     colorear_caras_aleatorio();
 
 }
+
+_rotacion_ply::_rotacion_ply() {};
+
+void _rotacion_ply::parametros(char* archivo, unsigned num) {
+
+    vector<_vertex3f> perfil;
+    vector<float> perfil_plano;
+    vector<int> _c;
+
+    _file_ply::read(archivo, perfil_plano, _c);
+    _c.clear();
+
+    unsigned p_size = perfil_plano.size() / 3;
+
+    // cout << "Número de vértices del perfil " << archivo << ": " << p_size << endl;
+
+    perfil.resize(p_size);
+    for (unsigned i = 0; i < perfil.size(); i++) {
+        perfil[i] = _vertex3f(
+            perfil_plano[3*i], perfil_plano[3*i+1], perfil_plano[3*i+2]
+        );
+    }
+
+    _rotacion::parametros(perfil, num);
+
+    colorear_caras_aleatorio();
+}
+
+_cono::_cono(float radio, float al, unsigned num) {
+
+    if (num < 3) {
+        num = 10;
+        cout <<  "[!] Numero de vertices invalido, se ha reestablecido a " << num << endl;
+    }
+
+    if (radio < 0) {
+        radio = 1;
+        cout << "[!] Radio no valido, se ha reestablecido a " << radio << endl;
+    }
+
+    if (al < 0) {
+        al = 1;
+        cout << "[!] Altura no valida, se ha reestablecido a " << al << endl;
+    }
+
+    vector<_vertex3f> profile;
+    profile.resize(3);
+    profile[0] = _vertex3f(0,al,0);
+    profile[1] = _vertex3f(radio, 0, 0);
+    profile[2] = _vertex3f(0,0,0);
+    parametros(profile, num);
+
+}
+
+_cilindro::_cilindro(float radio, float al, unsigned num) {
+
+    if (num < 3) {
+        num = 10;
+        cout << "[!] Numero de vertices invalido, se ha reestablecido a " << num << endl;
+    }
+
+    if (radio < 0) {
+        radio = 1;
+        cout << "[!] Radio no valido, se ha reestablecido a " << radio << endl;
+    }
+
+    if (al < 0) {
+        al = 1;
+        cout << "[!] Altura no valida, se ha reestablecido a " << al << endl;
+    }
+
+    // Generamos el perfil para el cilindro
+    vector<_vertex3f> perfil;
+    perfil.resize(2);
+    perfil[0] = _vertex3f(radio, al, 0);
+    perfil[1] = _vertex3f(radio, 0, 0);
+    parametros(perfil, num);
+}
+
+_esfera::_esfera(float radio, unsigned num_x, unsigned num_y) {
+
+    if (num_x < 3) {
+        num_x = 10;
+        cout << "[!] Numero de vertices en horizontal invalido, se ha reestablecido a " << num_x << endl;
+    }
+
+    if (num_y < 3) {
+        num_y = 10;
+        cout << "[!] Numero de vertices en horizontal invalido, se ha reestablecido a " << num_y << endl;
+    }
+
+    if (radio < 0) {
+        radio = 1;
+        cout << "[!] Radio no valido, se ha reestablecido a 1" << endl;
+    }
+
+    // Generamos el perfil para la esfera
+    vector<_vertex3f> perfil;
+    for (unsigned i=0; i < num_y; i++) {
+        float angulo = (float)i / (float)(num_y-1);
+        float x = radio * sin(M_PI * angulo);
+        float y = radio * cos(M_PI * angulo);
+        perfil.push_back(_vertex3f(x, y, 0));
+    }
+    parametros(perfil, num_x);
+
+};
 
 //************************************************************************
 // objeto por extrusión
@@ -324,13 +528,13 @@ _extrusion::_extrusion(vector<_vertex3f> poligono, float x, float y, float z)
     int i;
     _vertex3f vertice_aux;
     _vertex3i cara_aux;
-    int num_aux;
+    int tam_poligono;
 
     // tratamiento de los vértice
 
-    num_aux = poligono.size();
-    vertices.resize(num_aux * 2);
-    for (i = 0; i < num_aux; i++)
+    tam_poligono = poligono.size();
+    vertices.resize(tam_poligono * 2);
+    for (i = 0; i < tam_poligono; i++)
     {
         vertices[2 * i] = poligono[i];
         vertices[2 * i + 1].x = poligono[i].x + x;
@@ -340,20 +544,19 @@ _extrusion::_extrusion(vector<_vertex3f> poligono, float x, float y, float z)
 
     // tratamiento de las caras
 
-    caras.resize(num_aux * 2);
+    caras.resize(tam_poligono * 2);
     int c = 0;
-    for (i = 0; i < num_aux; i++)
+    for (i = 0; i < tam_poligono; i++)
     {
         caras[c]._0 = i * 2;
-        caras[c]._1 = (i * 2 + 2) % (num_aux * 2);
+        caras[c]._1 = (i * 2 + 2) % (tam_poligono * 2);
         caras[c]._2 = i * 2 + 1;
         c = c + 1;
-        caras[c]._0 = (i * 2 + 2) % (num_aux * 2);
-        caras[c]._1 = (i * 2 + 2) % (num_aux * 2) + 1;
+        caras[c]._0 = (i * 2 + 2) % (tam_poligono * 2);
+        caras[c]._1 = (i * 2 + 2) % (tam_poligono * 2) + 1;
         caras[c]._2 = i * 2 + 1;
         c = c + 1;
     }
 
-    colores.resize(caras.size());
     colorear_caras_aleatorio();
 }

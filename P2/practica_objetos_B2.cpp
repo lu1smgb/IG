@@ -15,8 +15,12 @@ typedef enum
 {
 	CUBO,
 	PIRAMIDE,
+	CONO,
+	CILINDRO,
+	ESFERA,
 	OBJETO_PLY,
 	ROTACION,
+	ROTACION_PLY,
 	EXTRUSION
 } _tipo_objeto;
 _tipo_objeto t_objeto = CUBO;
@@ -35,9 +39,13 @@ int Window_x = 50, Window_y = 50, Window_width = 650, Window_high = 650;
 
 // objetos
 _cubo cubo;
-_piramide piramide(0.85, 1.3);
+_piramide piramide;
+_cono cono;
+_cilindro cilindro;
+_esfera esfera;
 _objeto_ply ply;
 _rotacion rotacion;
+_rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 
 // _objeto_ply *ply;
@@ -119,7 +127,6 @@ void draw_axis()
 
 void draw_objects()
 {
-
 	switch (t_objeto)
 	{
 	case CUBO:
@@ -128,8 +135,20 @@ void draw_objects()
 	case PIRAMIDE:
 		piramide.draw(modo, 1.0, 0.0, 0.0, 5);
 		break;
+	case CONO:
+		cono.draw(modo, 1.0, 0.0, 0.0, 5);
+		break;
+	case CILINDRO:
+		cilindro.draw(modo, 1.0, 0.0, 0.0, 5);
+		break;
+	case ESFERA:
+		esfera.draw(modo, 1.0, 0.0, 0.0, 5);
+		break;
 	case OBJETO_PLY:
 		ply.draw(modo, 1.0, 0.6, 0.0, 5);
+		break;
+	case ROTACION_PLY:
+		rotacion_ply.draw(modo, 1.0, 0.6, 0.0, 5);
 		break;
 	case ROTACION:
 		rotacion.draw(modo, 1.0, 0.0, 0.0, 5);
@@ -183,6 +202,24 @@ void change_window_size(int Ancho1, int Alto1)
 
 void normal_key(unsigned char Tecla1, int x, int y)
 {
+	/**
+	 * ----- MAPA DE TECLAS -----
+	 * Q: Salir
+	 * 1: Modo de puntos
+	 * 2: Modo de aristas
+	 * 3: Modo de color solido
+	 * 4: Modo de color aleatorio
+	 * P: Piramide
+	 * C: Cubo
+	 * T: Cono
+	 * Y: Cilindro
+	 * U: Esfera
+	 * O: Objeto PLY
+	 * R: Objeto por rotacion
+	 * L: Objeto por rotacion mediante perfil PLY
+	 * X: Objeto por extrusion
+	 * ---------------------------
+	*/
 	switch (toupper(Tecla1))
 	{
 	case 'Q':
@@ -205,11 +242,23 @@ void normal_key(unsigned char Tecla1, int x, int y)
 	case 'C':
 		t_objeto = CUBO;
 		break;
+	case 'T':
+		t_objeto = CONO;
+		break;
+	case 'Y':
+		t_objeto = CILINDRO;
+		break;
+	case 'U':
+		t_objeto = ESFERA;
+		break;
 	case 'O':
 		t_objeto = OBJETO_PLY;
 		break;
 	case 'R':
 		t_objeto = ROTACION;
+		break;
+	case 'L':
+		t_objeto = ROTACION_PLY;
 		break;
 	case 'X':
 		t_objeto = EXTRUSION;
@@ -274,7 +323,7 @@ void initialize(void)
 
 	// se indica el color para limpiar la ventana	(r,v,a,al)
 	// blanco=(1,1,1,1) rojo=(1,0,0,1), ...
-	glClearColor(1, 1, 1, 1);
+	glClearColor(.1, .1, .1, 1);
 
 	// se habilita el z-bufer
 	glEnable(GL_DEPTH_TEST);
@@ -291,7 +340,6 @@ void initialize(void)
 
 int main(int argc, char *argv[])
 {
-
 	// perfil
 
 	vector<_vertex3f> perfil, poligono;
@@ -369,6 +417,8 @@ int main(int argc, char *argv[])
 
 	// creación del objeto ply
 	ply.parametros(argv[1]);
+
+	rotacion_ply.parametros("peon.perfil", 10);
 
 	// ply = new _objeto_ply(argv[1]);
 

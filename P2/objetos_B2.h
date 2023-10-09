@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 const float AXIS_SIZE = 5000;
+const float _0 = 1e-5;
 typedef enum
 {
     POINTS,
@@ -97,10 +98,35 @@ public:
 
 class _rotacion : public _triangulos3D
 {
+private:
+    void ordenar_perfil(vector<_vertex3f> &perfil);
 public:
     _rotacion();
 
-    void parametros(vector<_vertex3f> perfil, int num);
+    void parametros(vector<_vertex3f> perfil, unsigned num = 10);
+};
+
+class _rotacion_ply : public _rotacion
+{
+public:
+    _rotacion_ply();
+
+    void parametros(char* archivo, unsigned num = 10);  
+};
+
+class _cono : public _rotacion {
+    public:
+        _cono(float radio = 0.5, float al = 1, unsigned num = 10);
+};
+
+class _cilindro : public _rotacion {
+    public:
+        _cilindro(float radio = 0.5, float al = 1, unsigned num = 10);
+};
+
+class _esfera : public _rotacion {
+    public:
+        _esfera(float radio = 0.5, unsigned num_x = 10, unsigned num_y = 10);
 };
 
 //************************************************************************
