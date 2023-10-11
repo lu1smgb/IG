@@ -458,9 +458,9 @@ _cono::_cono(float radio, float al, unsigned num) {
 
     vector<_vertex3f> profile;
     profile.resize(3);
-    profile[0] = _vertex3f(0,al,0);
-    profile[1] = _vertex3f(radio, 0, 0);
-    profile[2] = _vertex3f(0,0,0);
+    profile[0] = _vertex3f(0,al/2,0);
+    profile[1] = _vertex3f(radio, -al/2, 0);
+    profile[2] = _vertex3f(0,-al/2,0);
     parametros(profile, num);
 
 }
@@ -485,8 +485,8 @@ _cilindro::_cilindro(float radio, float al, unsigned num) {
     // Generamos el perfil para el cilindro
     vector<_vertex3f> perfil;
     perfil.resize(2);
-    perfil[0] = _vertex3f(radio, al, 0);
-    perfil[1] = _vertex3f(radio, 0, 0);
+    perfil[0] = _vertex3f(radio, al/2, 0);
+    perfil[1] = _vertex3f(radio, -al/2, 0);
     parametros(perfil, num);
 }
 
@@ -510,7 +510,7 @@ _esfera::_esfera(float radio, unsigned num_x, unsigned num_y) {
     // Generamos el perfil para la esfera
     vector<_vertex3f> perfil;
     for (unsigned i=0; i < num_y; i++) {
-        float angulo = (float)i / (float)(num_y-1);
+        float angulo = (float)i / (float)(num_y - 1);
         float x = radio * sin(M_PI * angulo);
         float y = radio * cos(M_PI * angulo);
         perfil.push_back(_vertex3f(x, y, 0));
