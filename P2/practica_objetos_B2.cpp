@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
 	aux.z = 0.0;
 	perfil.push_back(aux);
 
-	rotacion.parametros(perfil, 6);
+	rotacion.parametros(perfil, 6, false, false);
 
 	aux.x = 1.0;
 	aux.y = 0.0;

@@ -39,6 +39,7 @@ class _triangulos3D : public _puntos3D
 protected:
     _vertex3f color_aleatorio();
     void colorear_caras_aleatorio();
+    void colorear_caras(unsigned short int preset = 0);
 public:
     _triangulos3D();
     void draw_aristas(float r, float g, float b, int grosor);
@@ -103,7 +104,7 @@ private:
 public:
     _rotacion();
 
-    void parametros(vector<_vertex3f> perfil, unsigned num = 10);
+    void parametros(vector<_vertex3f> perfil, unsigned num = 10, bool tapa_inferior = true, bool tapa_superior = true);
 };
 
 class _rotacion_ply : public _rotacion
@@ -111,22 +112,22 @@ class _rotacion_ply : public _rotacion
 public:
     _rotacion_ply();
 
-    void parametros(char* archivo, unsigned num = 10);  
+    void parametros(char* archivo, unsigned num = 10, bool tapa_inferior = true, bool tapa_superior = true);  
 };
 
 class _cono : public _rotacion {
     public:
-        _cono(float radio = 0.5, float al = 1, unsigned num = 10);
+        _cono(float radio = 0.5, float al = 1, unsigned num = 10, bool tapa_inferior = true, bool tapa_superior = true);
 };
 
 class _cilindro : public _rotacion {
     public:
-        _cilindro(float radio = 0.5, float al = 1, unsigned num = 10);
+        _cilindro(float radio = 0.5, float al = 1, unsigned num = 10, bool tapa_inferior = true, bool tapa_superior = true);
 };
 
 class _esfera : public _rotacion {
     public:
-        _esfera(float radio = 0.5, unsigned num_x = 10, unsigned num_y = 10);
+        _esfera(float radio = 0.5, unsigned num_x = 10, unsigned num_y = 10, bool tapa_inferior = true, bool tapa_superior = true);
 };
 
 //************************************************************************

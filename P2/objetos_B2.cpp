@@ -92,15 +92,36 @@ void _triangulos3D::draw_solido(float r, float g, float b)
 // dibujar en modo sólido con colores diferentes para cada cara
 //*************************************************************************
 
+void _triangulos3D::colorear_caras(unsigned short int preset) {
+    colores.resize(caras.size());
+    srand((unsigned)time(NULL));
+    switch (preset) {
+        case 1:
+            // Gamma de colores azules
+            // R: 0 - 0.3
+            // G: 0.3 - 0.6
+            // B: 1
+            for (unsigned int i = 0; i < colores.size(); i++)
+            {
+                colores[i] = _vertex3f(
+                    (float)(0 + (rand() % 30)) / (float)100,
+                    (float)(30 + (rand() % 30)) / (float)100,
+                    1);
+            }
+            break;
+        case 0:
+        default:
+            // Aleatorio por defecto
+            for (unsigned int i = 0; i < colores.size(); i++) {
+                colores[i] = color_aleatorio();
+            }
+            break;
+    }
+}
+
 void _triangulos3D::colorear_caras_aleatorio()
 {
-    colores.resize(caras.size());
-    // Establecemos la semilla aleatoria
-    srand((unsigned)time(NULL));
-    for (unsigned int i = 0; i < colores.size(); i++)
-    {
-        colores[i] = color_aleatorio();
-    }
+    colorear_caras();
 }
 
 void _triangulos3D::draw_solido_colores()
@@ -173,7 +194,7 @@ _cubo::_cubo(float tam)
     caras[10] = _vertex3i(4, 5, 6);
     caras[11] = _vertex3i(6, 7, 4);
 
-    colorear_caras_aleatorio();
+    colorear_caras();
 }
 
 //*************************************************************************
@@ -199,8 +220,7 @@ _piramide::_piramide(float tam, float al)
 	caras[4]._0 = 3; caras[4]._1 = 1; caras[4]._2 = 0;
 	caras[5]._0 = 3; caras[5]._1 = 2; caras[5]._2 = 1;
 
-	colorear_caras_aleatorio();
-
+    colorear_caras();
 }
 
 //*************************************************************************
@@ -230,7 +250,7 @@ _octaedro::_octaedro(float tam, float al)
     caras[6] = _vertex3i(3, 4, 2);
     caras[7] = _vertex3i(0, 4, 3);
 
-    colorear_caras_aleatorio();
+    colorear_caras();
 }
 
 //*************************************************************************
@@ -262,7 +282,7 @@ void _objeto_ply::parametros(char *archivo) {
         caras[i] = _vertex3i(car_ply[i*3], car_ply[i*3+1], car_ply[i*3+2]);
     }
 
-    colorear_caras_aleatorio();
+    colorear_caras();
 }
 
 //************************************************************************
@@ -297,8 +317,8 @@ void _rotacion::ordenar_perfil(vector<_vertex3f> &perfil) {
 
 }
 // Genera un poligono por revolucion a partir del perfil y de un numero positivo de revoluciones
-void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num) {
-
+void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num, bool tapa_inferior, bool tapa_superior) {
+    
     // Ordenamos el perfil proporcionado según su coordenada Y en orden descendente
     ordenar_perfil(perfil);
     
@@ -337,7 +357,7 @@ void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num) {
             */
             caras.push_back(_vertex3i(
                 tam_perfil * i + j, 
-               (tam_perfil * (i + 1) + j) % num_vertices, 
+               (tam_perfil * (i + 1) + j)       % num_vertices, 
                (tam_perfil * (i + 1) + (j + 1)) % num_vertices));
             /**
              * Cara de indice impar (inferior):
@@ -357,64 +377,74 @@ void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num) {
     // incluimos con el resto de vertices
     // En caso de que ya esten incluidos en el perfil (X aprox. 0), los anadimos directamente
     // en caso contrario, los generamos a partir del primero y el ultimo modificando la coordenada X
-    _vertex3f v_superior;
-    _vertex3f v_inferior;
-    _vertex3f &primero = perfil[0];
-    _vertex3f &ultimo = perfil[tam_perfil - 1];
-    if (abs(primero.x) < _0) {
-        v_superior = primero;
-    }
-    else {
-        v_superior = _vertex3f(0, primero.y, 0);
-    }
-    if (abs(ultimo.x) < _0) {
-        v_inferior = ultimo;
-    }
-    else {
-        v_inferior = _vertex3f(0, ultimo.y, 0);
-    }
-    vertices.push_back(v_superior);
-    vertices.push_back(v_inferior);
+    if (tapa_superior || tapa_inferior) {
 
-    // Generacion de la tapa superior
-    for (unsigned i = 0; i < num; i++) {
-        // La variable num_vertices no varia, pero num_vertices != vertices.size()
-        /**
-         * Cara superior (vista desde arriba):
-         * x = v_superior
-         * y = superior der
-         * z = superior izq (0)
-        */
-        _vertex3i cara(
-            num_vertices,
-            (tam_perfil * (i + 1)) % num_vertices,
-            tam_perfil * i);
-        caras.push_back(cara);
-    }
+        // Generacion de vertices
+        if (tapa_inferior) {
+            _vertex3f v_inferior;
+            _vertex3f &ultimo = perfil[tam_perfil - 1];
+            if (abs(ultimo.x) < _0)
+                v_inferior = ultimo;
+            else {
+                v_inferior = _vertex3f(0, ultimo.y, 0);
+            }
+            vertices.push_back(v_inferior);
+        }
+        if (tapa_superior) {
+            _vertex3f v_superior;
+            _vertex3f &primero = perfil[0];
+            if (abs(primero.x) < _0)
+                v_superior = primero;
+            else {
+                v_superior = _vertex3f(0, primero.y, 0);
+            }
+            vertices.push_back(v_superior);
+        }
 
-    // Generacion de la tapa inferior
-    for (unsigned i = 0; i < num; i++) {
-        /**
-         * Cara inferior (vista desde abajo):
-         * x = v_inferior
-         * y = inferior der
-         * z = inferior izq (0)
-        */
-        _vertex3i cara(
-            num_vertices + 1,
-            ((tam_perfil - 1) + tam_perfil * (i + 1)) % num_vertices,
-            ((tam_perfil - 1) + tam_perfil * i) % num_vertices);
-        caras.push_back(cara);
+        // Generacion de caras
+        for (unsigned i = 0; i < num; i++) {
+
+            bool dos_tapas = tapa_superior != tapa_inferior;
+
+            // La variable num_vertices no varia, pero num_vertices != vertices.size()
+            /**
+             * Cara superior (vista desde arriba):
+             * x = v_superior
+             * y = superior der
+             * z = superior izq (0)
+             */
+            if (tapa_superior) {
+                _vertex3i cara_superior(
+                    num_vertices,
+                    (tam_perfil * (i + 1)) % num_vertices,
+                    tam_perfil * i);
+                caras.push_back(cara_superior);
+            }
+
+            /**
+             * Cara inferior (vista desde abajo):
+             * x = v_inferior
+             * y = inferior der
+             * z = inferior izq (0)
+             */
+            if (tapa_inferior) {
+                _vertex3i cara_inferior(
+                    dos_tapas? num_vertices+1 : num_vertices,
+                    ((tam_perfil - 1) + tam_perfil * (i + 1)) % num_vertices,
+                    ((tam_perfil - 1) + tam_perfil * i) % num_vertices);
+                caras.push_back(cara_inferior);
+            }
+        }
     }
 
     // Finalmente asignamos un color a cada cara
-    colorear_caras_aleatorio();
+    colorear_caras();
 
 }
 
 _rotacion_ply::_rotacion_ply() {};
 
-void _rotacion_ply::parametros(char* archivo, unsigned num) {
+void _rotacion_ply::parametros(char* archivo, unsigned num, bool tapa_inferior, bool tapa_superior) {
 
     vector<_vertex3f> perfil;
     vector<float> perfil_plano;
@@ -434,16 +464,16 @@ void _rotacion_ply::parametros(char* archivo, unsigned num) {
         );
     }
 
-    _rotacion::parametros(perfil, num);
-
-    colorear_caras_aleatorio();
+    // Llamamos a la clase padre
+    _rotacion::parametros(perfil, num, tapa_inferior, tapa_superior);
 }
 
-_cono::_cono(float radio, float al, unsigned num) {
+_cono::_cono(float radio, float al, unsigned num, bool tapa_inferior, bool tapa_superior)
+{
 
     if (num < 3) {
         num = 10;
-        cout <<  "[!] Numero de vertices invalido, se ha reestablecido a " << num << endl;
+        cout << "[!] Numero de vertices invalido, se ha reestablecido a " << num << endl;
     }
 
     if (radio < 0) {
@@ -461,11 +491,10 @@ _cono::_cono(float radio, float al, unsigned num) {
     profile[0] = _vertex3f(0,al/2,0);
     profile[1] = _vertex3f(radio, -al/2, 0);
     profile[2] = _vertex3f(0,-al/2,0);
-    parametros(profile, num);
-
+    parametros(profile, num, tapa_inferior, tapa_superior);
 }
 
-_cilindro::_cilindro(float radio, float al, unsigned num) {
+_cilindro::_cilindro(float radio, float al, unsigned num, bool tapa_inferior, bool tapa_superior) {
 
     if (num < 3) {
         num = 10;
@@ -487,10 +516,10 @@ _cilindro::_cilindro(float radio, float al, unsigned num) {
     perfil.resize(2);
     perfil[0] = _vertex3f(radio, al/2, 0);
     perfil[1] = _vertex3f(radio, -al/2, 0);
-    parametros(perfil, num);
+    parametros(perfil, num, tapa_inferior, tapa_superior);
 }
 
-_esfera::_esfera(float radio, unsigned num_x, unsigned num_y) {
+_esfera::_esfera(float radio, unsigned num_x, unsigned num_y, bool tapa_inferior, bool tapa_superior) {
 
     if (num_x < 3) {
         num_x = 10;
@@ -515,8 +544,7 @@ _esfera::_esfera(float radio, unsigned num_x, unsigned num_y) {
         float y = radio * cos(M_PI * angulo);
         perfil.push_back(_vertex3f(x, y, 0));
     }
-    parametros(perfil, num_x);
-
+    parametros(perfil, num_x, tapa_inferior, tapa_superior);
 };
 
 //************************************************************************
