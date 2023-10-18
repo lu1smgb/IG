@@ -318,7 +318,7 @@ void _rotacion::ordenar_perfil(vector<_vertex3f> &perfil) {
 }
 // Genera un poligono por revolucion a partir del perfil y de un numero positivo de revoluciones
 void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num, bool tapa_inferior, bool tapa_superior) {
-    
+
     // Ordenamos el perfil proporcionado según su coordenada Y en orden descendente
     ordenar_perfil(perfil);
     
@@ -380,17 +380,8 @@ void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num, bool tapa_inf
     if (tapa_superior || tapa_inferior) {
 
         // Generacion de vertices
-        if (tapa_inferior) {
-            _vertex3f v_inferior;
-            _vertex3f &ultimo = perfil[tam_perfil - 1];
-            if (abs(ultimo.x) < _0)
-                v_inferior = ultimo;
-            else {
-                v_inferior = _vertex3f(0, ultimo.y, 0);
-            }
-            vertices.push_back(v_inferior);
-        }
         if (tapa_superior) {
+            std::cout << "Tapa superior" << std::endl;
             _vertex3f v_superior;
             _vertex3f &primero = perfil[0];
             if (abs(primero.x) < _0)
@@ -401,10 +392,20 @@ void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num, bool tapa_inf
             vertices.push_back(v_superior);
         }
 
+        if (tapa_inferior) {
+            std::cout << "Tapa inferior" << std::endl;
+            _vertex3f v_inferior;
+            _vertex3f &ultimo = perfil[tam_perfil - 1];
+            if (abs(ultimo.x) < _0)
+                v_inferior = ultimo;
+            else {
+                v_inferior = _vertex3f(0, ultimo.y, 0);
+            }
+            vertices.push_back(v_inferior);
+        }
+
         // Generacion de caras
         for (unsigned i = 0; i < num; i++) {
-
-            bool dos_tapas = tapa_superior != tapa_inferior;
 
             // La variable num_vertices no varia, pero num_vertices != vertices.size()
             /**
@@ -429,7 +430,8 @@ void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num, bool tapa_inf
              */
             if (tapa_inferior) {
                 _vertex3i cara_inferior(
-                    dos_tapas? num_vertices+1 : num_vertices,
+                    // Si tambien dibujo la otra cara, entonces apuntamos al punto correspondiente
+                    tapa_superior ? num_vertices + 1 : num_vertices,
                     ((tam_perfil - 1) + tam_perfil * (i + 1)) % num_vertices,
                     ((tam_perfil - 1) + tam_perfil * i) % num_vertices);
                 caras.push_back(cara_inferior);

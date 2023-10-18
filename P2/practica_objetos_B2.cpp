@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
 	aux.z = 0.0;
 	perfil.push_back(aux);
 
-	rotacion.parametros(perfil, 6, false, false);
+	rotacion.parametros(perfil, 6, true, false);
 
 	aux.x = 1.0;
 	aux.y = 0.0;
@@ -416,7 +416,7 @@ int main(int argc, char *argv[])
 	// creación del objeto ply
 	ply.parametros(argv[1]);
 
-	rotacion_ply.parametros("peon.perfil", 10);
+	rotacion_ply.parametros("peon.perfil", 10, true, false);
 
 	// ply = new _objeto_ply(argv[1]);
 
