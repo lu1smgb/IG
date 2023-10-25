@@ -48,7 +48,7 @@ _objeto_ply ply;
 _rotacion rotacion;
 _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
-_torso *jerarquico;
+_cuerpo *jerarquico;
 
 //**************************************************************************
 //
@@ -290,17 +290,16 @@ void special_key(int Tecla1, int x, int y)
 		break;
 
 	case GLUT_KEY_F1:
-		if (jerarquico->rotacion_sup_izq < 190 && jerarquico)
-		jerarquico->rotacion_sup_izq = jerarquico->rotacion_sup_izq + 5;
+		jerarquico->rotacion_sup_izq = int(jerarquico->rotacion_sup_izq + 5) % 360;
 		break;
 	case GLUT_KEY_F2:
-		jerarquico->rotacion_sup_izq = jerarquico->rotacion_sup_izq - 5;
+		jerarquico->rotacion_sup_izq = int(jerarquico->rotacion_sup_izq - 5) % 360;
 		break;
 	case GLUT_KEY_F3:
-		jerarquico->rotacion_inf_izq = jerarquico->rotacion_inf_izq + 5;
+		jerarquico->rotacion_inf_izq = int(jerarquico->rotacion_inf_izq + 5) % 360;
 		break;
 	case GLUT_KEY_F4:
-		jerarquico->rotacion_inf_izq = jerarquico->rotacion_inf_izq - 5;
+		jerarquico->rotacion_inf_izq = int(jerarquico->rotacion_inf_izq - 5) % 360;
 		break;
 	case GLUT_KEY_F5:
 		jerarquico->rotacion_sup_der += 5;
@@ -493,7 +492,7 @@ int main(int argc, char *argv[])
 
 	// ply = new _objeto_ply(argv[1]);
 
-	jerarquico = new _torso();
+	jerarquico = new _cuerpo();
 
 	// inicio del bucle de eventos
 	glutMainLoop();

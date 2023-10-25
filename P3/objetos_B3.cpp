@@ -645,7 +645,7 @@ void _brazo::draw(_modo modo, float r, float g, float b, float grosor) {
     glPopMatrix();
 }
 
-_torso::_torso() {
+_cuerpo::_cuerpo() {
     this->ancho = 1;
     this->altura = 2;
     this->profundo = 0.75;
@@ -655,7 +655,7 @@ _torso::_torso() {
     this->rotacion_inf_der = 15;
 }
 
-void _torso::draw(_modo modo, float r, float g, float b, float grosor) {
+void _cuerpo::draw(_modo modo, float r, float g, float b, float grosor) {
     // Dibujamos el torso
     glPushMatrix();
     glTranslatef(0, this->altura / 2, 0);

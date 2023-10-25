@@ -169,7 +169,7 @@ protected:
     _pieza_brazo pieza_brazo;
 };
 
-class _torso : public _triangulos3D {
+class _cuerpo : public _triangulos3D {
 public:
     float ancho;
     float altura;
@@ -181,7 +181,7 @@ public:
     float rotacion_inf_izq;
     float rotacion_sup_der;
     float rotacion_inf_der;
-    _torso();
+    _cuerpo();
     void draw(_modo modo, float r, float g, float b, float grosor);
 protected:
     _cubo cubo;
