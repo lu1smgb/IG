@@ -143,47 +143,74 @@ public:
 
 // *********************************************************************************
 //                          Practica 3 - Modelo Jerarquico
-// Posible propuesta:
-// Guerrero con espada y escudo
+// UN AVION
 // *********************************************************************************
 
-class _pieza_brazo : public _triangulos3D {
+class _aleron : public _triangulos3D
+{
 public:
-    float ancho; // Longitud horizontal
-    float fondo; // Longitud en Z
-    float largo; // Longitud vertical
-    _pieza_brazo();
-    void draw(_modo modo, float r, float g, float b, float grosor, int lado = 0);
+    _aleron();
+    void draw(_modo modo, float r, float g, float b, float grosor);
+
 protected:
     _cubo cubo;
 };
 
-// No forma parte del modelo jerarquico final
-class _brazo : public _triangulos3D {
+class _ala : public _triangulos3D {
 public:
-    float rotacion_sup;
-    float rotacion_inf;
-    _brazo();
-    void draw(_modo modo, float r, float g, float b, float grosor);
-protected:
-    _pieza_brazo pieza_brazo;
-};
-
-class _cuerpo : public _triangulos3D {
-public:
-    float ancho;
-    float altura;
-    float profundo;
-    float ancho_brazo;
-    float largo_brazo;
-    float fondo_brazo;
-    float rotacion_sup_izq;
-    float rotacion_inf_izq;
-    float rotacion_sup_der;
-    float rotacion_inf_der;
-    _cuerpo();
+    float longitud; // Longitud en el eje X
+    float grosor; // Longitud en el eje Y
+    float anchura; // Longitud en el eje Z
+    float apertura_aleron;
+    _ala(float longitud = 5, float grosor = 0.1, float anchura = 1, float apertura_aleron = 30);
     void draw(_modo modo, float r, float g, float b, float grosor);
 protected:
     _cubo cubo;
-    _pieza_brazo pieza_brazo;
+    _aleron aleron;
 };
+
+class _aspa : public _triangulos3D
+{
+public:
+    float longitud; // Longitud en el eje X
+    float grosor;   // Longitud en el eje Y
+    float anchura;  // Longitud en el eje Z
+    float inclinacion; // Inclinacion del aspa
+    _aspa(float longitud = 3, float grosor = 0.25, float anchura = 1, float inclinacion = 15);
+    void draw(_modo modo, float r, float g, float b, float grosor);
+protected:
+    _cubo cubo;
+};
+
+class _helice : public _triangulos3D {
+public:
+    float longitud;    // Longitud en el eje X
+    float grosor;      // Longitud en el eje Y
+    float anchura;     // Longitud en el eje Z
+    float inclinacion; // Inclinacion del aspa
+    float margen;
+    unsigned short int num_helices;
+    _helice(float longitud = 5, float grosor = 0.25, float anchura = 1, float inclinacion = 0, float margen = 1, float num_helices = 4);
+    void draw(_modo modo, float r, float g, float b, float grosor);
+protected:
+    _aspa aspa;
+    _cilindro eje;
+};
+
+class _tren_aterrizaje : public _triangulos3D {
+public:
+    float diametro_rueda;
+    float longitud_brazo;
+    _tren_aterrizaje(float diametro_rueda = 0.5, float longitud_brazo = 1);
+    void draw(_modo modo, float r, float g, float b, float grosor);
+protected:
+    _cilindro cilindro;
+};
+
+/**
+ * Alerones para las alas (HECHO)
+ * Tren de aterrizaje (HECHO)
+ * Estabilizadores
+ * Fuselaje (cabina)
+ * Helice (HECHO)
+*/

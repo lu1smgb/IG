@@ -593,99 +593,125 @@ _extrusion::_extrusion(vector<_vertex3f> poligono, float x, float y, float z)
 
 // *********************************************************************************
 //                          Practica 3 - Modelo Jerarquico
+// UN AVION
 // *********************************************************************************
 
-_pieza_brazo::_pieza_brazo() {
-    this->ancho = 0.5;
-    this->largo = 1.2;
-    this->fondo = 0.5;
+_ala::_ala(float longitud, float grosor, float anchura, float apertura_aleron)
+{
+    this->longitud = longitud;
+    this->grosor = grosor;
+    this->anchura = anchura;
+    this->apertura_aleron = abs(apertura_aleron);
+    this->cubo = _cubo();
+    this->aleron = _aleron();
 }
 
-void _pieza_brazo::draw(_modo modo, float r, float g, float b, float grosor, int lado) {
-    // Dibujaremos una pieza trasladada de manera que pueda girar sobre un eje en especifico
-    // ? Sugerencia: cambiar la traslacion de la pieza
+void _ala::draw(_modo modo, float r, float g, float b, float grosor)
+{
+    const float PROPORCION_DELANTERA = 0.8;
+    const float PROPORCION_INFERIOR = 0.6;
+    const float PROPORCION_TRASERA = 1 - PROPORCION_DELANTERA;
+    const float PROPORCION_SUPERIOR = 1 - PROPORCION_INFERIOR;
     glPushMatrix();
-    float Tx = 0;
-    /**
-     * Desde el punto de vista del usuario del brazo:
-     * Positivo: derecho
-     * Negativo: izquierdo
-    */
-    if (lado > 0)
-    {
-        Tx = -ancho / 2;
-    }
-    else if (lado < 0)
-    {
-        Tx = ancho / 2;
-    }
-    glTranslatef(Tx, -this->largo / 2, 0);
-    glScalef(this->ancho, this->largo, this->fondo);
+    glTranslatef(0, 0, this->anchura * PROPORCION_DELANTERA / 2);
+    glScalef(this->longitud, this->grosor, this->anchura * PROPORCION_DELANTERA);
+    cubo.draw(modo, r, g, b, grosor);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 0, -this->anchura * PROPORCION_TRASERA / 2);
+    glTranslatef(0, -this->grosor * PROPORCION_SUPERIOR / 2, 0);
+    glScalef(this->longitud, this->grosor * PROPORCION_INFERIOR, this->anchura * PROPORCION_TRASERA);
+    cubo.draw(modo, r, g, b, grosor);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotatef(apertura_aleron, 1, 0, 0);
+    glScalef(this->longitud, this->grosor * PROPORCION_SUPERIOR, this->anchura * PROPORCION_TRASERA);
+    aleron.draw(modo, r, g, b, grosor);
+    glPopMatrix();
+}
+
+_aleron::_aleron() {
+    this->cubo = _cubo();
+}
+
+void _aleron::draw(_modo modo, float r, float g, float b, float grosor)
+{
+    glPushMatrix();
+    glTranslatef(0, 0.5, -0.5);
+    // glScalef(1, 1, 1);
     cubo.draw(modo, r, g, b, grosor);
     glPopMatrix();
 }
 
-// ! NOTA: _brazo no se utiliza para el modelo jerarquico final
-_brazo::_brazo() {
-    this->rotacion_sup = 0;
-    this->rotacion_inf = 0;
+_aspa::_aspa(float longitud, float grosor, float anchura, float inclinacion) {
+    this->longitud = longitud;
+    this->grosor = grosor;
+    this->anchura = anchura;
+    this->inclinacion = inclinacion;
+    this->cubo = _cubo();
 }
 
-void _brazo::draw(_modo modo, float r, float g, float b, float grosor) {
-    // Utilizaremos el brazo atomico para dibujar un brazo de dos articulaciones
+void _aspa::draw(_modo modo, float r, float g, float b, float grosor)
+{
     glPushMatrix();
-    // Primero el brazo de arriba
-    glRotatef(rotacion_sup, 0, 0, 1);
-    pieza_brazo.draw(modo, r, g, b, grosor);
-    // Y despues el de abajo
-    glTranslatef(0, -pieza_brazo.largo / 1.15, 0);
-    glRotatef(rotacion_inf, 1, 0, 0);
-    glScalef(0.8, 1, 0.8);
-    pieza_brazo.draw(modo, r, g, b, grosor);
-    glPopMatrix();
-}
-
-_cuerpo::_cuerpo() {
-    this->ancho = 1;
-    this->altura = 2;
-    this->profundo = 0.75;
-    this->rotacion_sup_izq = 5;
-    this->rotacion_inf_izq = 15;
-    this->rotacion_sup_der = 5;
-    this->rotacion_inf_der = 15;
-}
-
-void _cuerpo::draw(_modo modo, float r, float g, float b, float grosor) {
-    // Dibujamos el torso
-    glPushMatrix();
-    glTranslatef(0, this->altura / 2, 0);
-    glScalef(this->ancho, this->altura, this->profundo);
+    glRotatef(this->inclinacion, 0, 1, 0);
+    glTranslatef(0, this->longitud / 2, 0);
+    glScalef(this->anchura, this->longitud, this->grosor);
     cubo.draw(modo, r, g, b, grosor);
     glPopMatrix();
+}
 
-    // Dibujamos el brazo derecho
+_helice::_helice(float longitud, float grosor, float anchura, float inclinacion, float margen, float num_helices) {
+    this->longitud = longitud;
+    this->grosor = grosor;
+    this->anchura = anchura;
+    this->inclinacion = abs(inclinacion);
+    this->margen = margen;
+    this->num_helices = num_helices;
+    this->eje = _cilindro();
+    this->aspa = _aspa(this->longitud, this->grosor, this->anchura, this->inclinacion);
+}
+
+void _helice::draw(_modo modo, float r, float g, float b, float grosor)
+{
+    const float RAD_INCLINACION = (this->inclinacion / 360) * (2*M_PI);
+    const float DIM_XZ = this->margen + this->anchura;
+    const float DIM_Y = this->margen + (this->grosor * cos(RAD_INCLINACION)) + (this->anchura * sin(RAD_INCLINACION));
     glPushMatrix();
-    glTranslatef(-this->ancho / 2, this->altura / 1.1, 0);
-    glRotatef(-rotacion_sup_der, 1, 0, 0);
-        glPushMatrix();
-        pieza_brazo.draw(modo, r, g, b, grosor, 1);
-        glTranslatef(0, -this->pieza_brazo.largo / 1.15, 0);
-        glScalef(0.8, 1, 0.8);
-        glRotatef(-rotacion_inf_der, 1, 0, 0);
-        pieza_brazo.draw(modo, r, g, b, grosor, 1);
-        glPopMatrix();
+    glRotatef(90, 1, 0, 0);
+    glScalef(DIM_XZ, DIM_Y, DIM_XZ);
+    eje.draw(modo, r, g, b, grosor);
     glPopMatrix();
 
-    // Dibujamos el brazo izquierdo
     glPushMatrix();
-    glTranslatef(this->ancho / 2, this->altura / 1.1, 0);
-    glRotatef(-rotacion_sup_izq, 1, 0, 0);
-        glPushMatrix();
-        pieza_brazo.draw(modo, r, g, b, grosor, -1);
-        glTranslatef(0, -this->pieza_brazo.largo / 1.15, 0);
-        glScalef(0.8, 1, 0.8);
-        glRotatef(-rotacion_inf_izq, 1, 0, 0);
-        pieza_brazo.draw(modo, r, g, b, grosor, -1);
-        glPopMatrix();
+    for (unsigned short int i = 0; i < num_helices; i++) {
+        glRotatef(360 / num_helices, 0, 0, 1);
+        aspa.draw(modo, r, g, b, grosor);
+    }
     glPopMatrix();
+}
+
+_tren_aterrizaje::_tren_aterrizaje(float diametro_rueda, float longitud_brazo) {
+    this->diametro_rueda = diametro_rueda;
+    this->longitud_brazo = longitud_brazo;
+    this->cilindro = _cilindro();
+}
+
+void _tren_aterrizaje::draw(_modo modo, float r, float g, float b, float grosor) {
+
+    glPushMatrix();
+    glTranslatef(0, -this->longitud_brazo / 2, 0);
+    glScalef(0.25, this->longitud_brazo, 0.25);
+    cilindro.draw(modo, r, g, b, grosor);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, -this->longitud_brazo, 0);
+    glRotatef(90, 0, 0, 1);
+    glScalef(diametro_rueda, 0.5, diametro_rueda);
+    cilindro.draw(modo, r, g, b, grosor);
+    glPopMatrix();
+
 }

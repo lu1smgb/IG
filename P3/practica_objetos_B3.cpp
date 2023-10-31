@@ -48,7 +48,7 @@ _objeto_ply ply;
 _rotacion rotacion;
 _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
-_cuerpo *jerarquico;
+_ala *jerarquico = new _ala();
 
 //**************************************************************************
 //
@@ -288,31 +288,6 @@ void special_key(int Tecla1, int x, int y)
 	case GLUT_KEY_PAGE_DOWN:
 		Observer_distance /= 1.2;
 		break;
-
-	case GLUT_KEY_F1:
-		jerarquico->rotacion_sup_izq = int(jerarquico->rotacion_sup_izq + 5) % 360;
-		break;
-	case GLUT_KEY_F2:
-		jerarquico->rotacion_sup_izq = int(jerarquico->rotacion_sup_izq - 5) % 360;
-		break;
-	case GLUT_KEY_F3:
-		jerarquico->rotacion_inf_izq = int(jerarquico->rotacion_inf_izq + 5) % 360;
-		break;
-	case GLUT_KEY_F4:
-		jerarquico->rotacion_inf_izq = int(jerarquico->rotacion_inf_izq - 5) % 360;
-		break;
-	case GLUT_KEY_F5:
-		jerarquico->rotacion_sup_der += 5;
-		break;
-	case GLUT_KEY_F6:
-		jerarquico->rotacion_sup_der -= 5;
-		break;
-	case GLUT_KEY_F7:
-		jerarquico->rotacion_inf_der += 5;
-		break;
-	case GLUT_KEY_F8:
-		jerarquico->rotacion_inf_der -= 5;
-		break;
 	}
 	glutPostRedisplay();
 }
@@ -360,7 +335,7 @@ void print_controls() {
 			  << "[R]\t->\tDibujar objeto por rotacion\n"
 			  << "[L]\t->\tDibujar objeto por mediante perfil PLY\n"
 			  << "[X]\t->\tDibujar objeto por mediante perfil PLY\n"
-			  << "[A]\t->\tDibujar objeto jerarquico\n"
+			  << "[A]\t->\tDibujar objeto jerarquico (avion)\n"
 			  << "\t--- Controles del objeto jerarquico ---\n"
 			  << "[F1]\t->\t???\n"
 			  << "[F2]\t->\t???\n"
@@ -385,9 +360,9 @@ void initialize(void)
 	Back_plane = 1000;
 
 	// se incia la posicion del observador, en el eje z
-	Observer_distance = 4 * Front_plane;
-	Observer_angle_x = 0;
-	Observer_angle_y = 0;
+	Observer_distance = 8 * Front_plane;
+	Observer_angle_x = 30;
+	Observer_angle_y = -45;
 
 	// se indica el color para limpiar la ventana	(r,v,a,al)
 	// blanco=(1,1,1,1) rojo=(1,0,0,1), ...
@@ -492,12 +467,8 @@ int main(int argc, char *argv[])
 
 	// ply = new _objeto_ply(argv[1]);
 
-	jerarquico = new _cuerpo();
-
 	// inicio del bucle de eventos
 	glutMainLoop();
-
-	delete jerarquico;
 	
 	return 0;
 }
