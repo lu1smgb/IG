@@ -633,7 +633,7 @@ void _ala::draw(_modo modo, float r, float g, float b, float grosor)
 }
 
 _aleron::_aleron() {
-    this->cubo = _cubo();
+
 }
 
 void _aleron::draw(_modo modo, float r, float g, float b, float grosor)
@@ -663,13 +663,14 @@ void _aspa::draw(_modo modo, float r, float g, float b, float grosor)
     glPopMatrix();
 }
 
-_helice::_helice(float longitud, float grosor, float anchura, float inclinacion, float margen, float num_helices) {
+_helice::_helice(float longitud, float grosor, float anchura, float inclinacion, float margen, float num_helices, float longitud_brazo) {
     this->longitud = longitud;
     this->grosor = grosor;
     this->anchura = anchura;
     this->inclinacion = abs(inclinacion);
     this->margen = margen;
     this->num_helices = num_helices;
+    this->longitud_brazo = longitud_brazo;
     this->eje = _cilindro();
     this->aspa = _aspa(this->longitud, this->grosor, this->anchura, this->inclinacion);
 }
@@ -679,17 +680,29 @@ void _helice::draw(_modo modo, float r, float g, float b, float grosor)
     const float RAD_INCLINACION = (this->inclinacion / 360) * (2*M_PI);
     const float DIM_XZ = this->margen + this->anchura;
     const float DIM_Y = this->margen + (this->grosor * cos(RAD_INCLINACION)) + (this->anchura * sin(RAD_INCLINACION));
+    
     glPushMatrix();
+    glTranslatef(0, 0, longitud_brazo / 2);
     glRotatef(90, 1, 0, 0);
-    glScalef(DIM_XZ, DIM_Y, DIM_XZ);
+    glScalef(DIM_XZ / 2, longitud_brazo, DIM_XZ / 2);
     eje.draw(modo, r, g, b, grosor);
     glPopMatrix();
-
+    
     glPushMatrix();
-    for (unsigned short int i = 0; i < num_helices; i++) {
-        glRotatef(360 / num_helices, 0, 0, 1);
-        aspa.draw(modo, r, g, b, grosor);
-    }
+    glTranslatef(0, 0, longitud_brazo);
+        glPushMatrix();
+        glRotatef(90, 1, 0, 0);
+        glScalef(DIM_XZ, DIM_Y, DIM_XZ);
+        eje.draw(modo, r, g, b, grosor);
+        glPopMatrix();
+
+        glPushMatrix();
+        for (unsigned short int i = 0; i < num_helices; i++)
+        {
+            glRotatef(360 / num_helices, 0, 0, 1);
+            aspa.draw(modo, r, g, b, grosor);
+        }
+        glPopMatrix();
     glPopMatrix();
 }
 
@@ -714,4 +727,65 @@ void _tren_aterrizaje::draw(_modo modo, float r, float g, float b, float grosor)
     cilindro.draw(modo, r, g, b, grosor);
     glPopMatrix();
 
+}
+
+_fuselaje::_fuselaje(float anchura, float altura, float longitud) {
+    this->anchura = anchura;
+    this->altura = altura;
+    this->longitud = longitud;
+    this->cubo = _cubo();
+}
+
+void _fuselaje::draw(_modo modo, float r, float g, float b, float grosor) {
+
+    glPushMatrix();
+    glScalef(this->anchura, this->altura, this->longitud);
+    cubo.draw(modo, r, g, b, grosor);
+    glPopMatrix();
+
+}
+
+_avion::_avion(float inclinacion_horizontal, float inclinacion_vertical, float angulo_direccion)
+{
+    this->inclinacion_horizontal = inclinacion_horizontal;
+    this->inclinacion_vertical = inclinacion_vertical;
+    this->angulo_direccion = angulo_direccion;
+    fuselaje = _fuselaje();
+    ala = _ala();
+    tren_aterrizaje = _tren_aterrizaje();
+    helice = _helice();
+}
+
+void _avion::draw(_modo modo, float r, float g, float b, float grosor)
+{
+    const float ESCALA_HELICE = 0.08;
+    const float ESCALA_TREN_AT = 0.2;
+
+    glPushMatrix();
+    glRotatef(inclinacion_horizontal, 0, 0, 1);
+    glRotatef(angulo_direccion, 0, 1, 0);
+    glRotatef(inclinacion_vertical, 1, 0, 0);
+        fuselaje.draw(modo, r, g, b, grosor);
+        glPushMatrix();
+        glTranslatef(-fuselaje.anchura / 2 - ala.longitud / 2, 0, 0);
+        ala.draw(modo, r, g, b, grosor);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(fuselaje.anchura / 2 + ala.longitud / 2, 0, 0);
+        ala.draw(modo, r, g, b, grosor);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(0, 0, fuselaje.longitud / 2);
+        glScalef(ESCALA_HELICE, ESCALA_HELICE, ESCALA_HELICE);
+        helice.draw(modo, r, g, b, grosor);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(0, -fuselaje.altura / 2, (fuselaje.longitud / 2) * 0.95);
+        glScalef(ESCALA_TREN_AT, ESCALA_TREN_AT, ESCALA_TREN_AT);
+        tren_aterrizaje.draw(modo, r, g, b, grosor);
+        glPopMatrix();
+    glPopMatrix();
 }

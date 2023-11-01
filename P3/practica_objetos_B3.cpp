@@ -48,7 +48,7 @@ _objeto_ply ply;
 _rotacion rotacion;
 _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
-_ala *jerarquico = new _ala();
+_avion *jerarquico = new _avion(0, 0, 0);
 
 //**************************************************************************
 //
