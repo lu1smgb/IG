@@ -214,7 +214,20 @@ public:
     float anchura;
     float altura;
     float longitud;
-    _fuselaje(float anchura = 0.5, float altura = 0.25, float longitud = 5);
+    _fuselaje(float anchura = 0.75, float altura = 0.5, float longitud = 5);
+    void draw(_modo modo, float r, float g, float b, float grosor);
+protected:
+    _cubo cubo;
+    _aleron retrovisor;
+};
+
+class _timon : public _triangulos3D
+{
+public:
+    float grosor;
+    float altura;
+    float longitud;
+    _timon(float grosor = 0.1, float altura = 1, float longitud = 0.5);
     void draw(_modo modo, float r, float g, float b, float grosor);
 protected:
     _cubo cubo;
@@ -232,12 +245,5 @@ protected:
     _ala ala;
     _tren_aterrizaje tren_aterrizaje;
     _helice helice;
+    _timon timon;
 };
-
-/**
- * Alerones para las alas (HECHO)
- * Tren de aterrizaje (HECHO)
- * Estabilizadores
- * Fuselaje (cabina)
- * Helice (HECHO)
-*/
