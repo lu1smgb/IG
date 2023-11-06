@@ -790,9 +790,17 @@ _avion::_avion(float inclinacion_horizontal, float inclinacion_vertical, float a
 {
     this->inclinacion_horizontal = inclinacion_horizontal;
     this->inclinacion_vertical = inclinacion_vertical;
-    this->angulo_direccion = angulo_direccion;
+    this->angulo_direccion = 0;
+
+    this->rotacion_helice = 0;
+    this->apertura_tren = -15;
+    this->direccion_timon = 0;
+    this->apertura_alerones = 0;
+
+    this->posicion = _vertex3f(0,0,0);
+
     this->fuselaje = _fuselaje();
-    this->ala = _ala();
+    this->ala = _ala(5, 0.1, 1, this->apertura_alerones);
     this->tren_aterrizaje = _tren_aterrizaje();
     this->helice = _helice();
     this->timon = _timon();
@@ -802,6 +810,9 @@ void _avion::draw(_modo modo, float r, float g, float b, float grosor)
 {
     const float ESCALA_HELICE = 0.08;
     const float ESCALA_TREN_AT = 0.2;
+
+    // Actualizamos la apertura del aleron de la instancia del ala
+    ala.apertura_aleron = this->apertura_alerones;
 
     glPushMatrix();
     glRotatef(inclinacion_horizontal, 0, 0, 1);
@@ -844,13 +855,14 @@ void _avion::draw(_modo modo, float r, float g, float b, float grosor)
         // Timon
         glPushMatrix();
         glTranslatef(0, 0, timon.longitud - fuselaje.longitud / 2);
-        // glRotatef(10, 0, 1, 0);
+        glRotatef(direccion_timon, 0, 1, 0);
         timon.draw(modo, r, g, b, grosor);
         glPopMatrix();
 
         // Helice
         glPushMatrix();
         glTranslatef(0, 0, fuselaje.longitud / 2);
+        glRotatef(rotacion_helice, 0, 0, 1);
         glScalef(ESCALA_HELICE, ESCALA_HELICE, ESCALA_HELICE);
         helice.draw(modo, r, g, b, grosor);
         glPopMatrix();
@@ -862,17 +874,18 @@ void _avion::draw(_modo modo, float r, float g, float b, float grosor)
         tren_aterrizaje.draw(modo, r, g, b, grosor);
         glPopMatrix();
 
-        // Trenes de aterrizaje laterales
+        // Tren de aterrizaje derecho
         glPushMatrix();
         glTranslatef(0.1, -fuselaje.altura / 4, 0);
-        glRotatef(15, 1, 0, 0);
+        glRotatef(apertura_tren, 1, 0, 0);
         glScalef(ESCALA_TREN_AT, ESCALA_TREN_AT, ESCALA_TREN_AT);
         tren_aterrizaje.draw(modo, r, g, b, grosor);
         glPopMatrix();
 
+        // Tren de aterrizaje izquierdo
         glPushMatrix();
         glTranslatef(-0.1, -fuselaje.altura / 4, 0);
-        glRotatef(15, 1, 0, 0);
+        glRotatef(apertura_tren, 1, 0, 0);
         glScalef(ESCALA_TREN_AT, ESCALA_TREN_AT, ESCALA_TREN_AT);
         tren_aterrizaje.draw(modo, r, g, b, grosor);
         glPopMatrix();

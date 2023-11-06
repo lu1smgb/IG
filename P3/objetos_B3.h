@@ -190,7 +190,7 @@ public:
     float margen;
     float longitud_brazo;
     unsigned short int num_helices;
-    _helice(float longitud = 5, float grosor = 0.25, float anchura = 1, float inclinacion = 0, 
+    _helice(float longitud = 5, float grosor = 0.25, float anchura = 1, float inclinacion = 15, 
             float margen = 1, float num_helices = 4, float longitud_brazo = 2);
     void draw(_modo modo, float r, float g, float b, float grosor);
 protected:
@@ -238,6 +238,15 @@ public:
     float inclinacion_horizontal; // Rotacion sobre el eje Z
     float inclinacion_vertical; // Rotacion sobre el eje X
     float angulo_direccion; // Rotacion sobre el eje Y
+
+    // Variables para el manejo de las articulaciones
+    float apertura_alerones;
+    float rotacion_helice;
+    float apertura_tren;
+    float direccion_timon;
+
+    _vertex3f posicion;
+
     _avion(float inclinacion_horizontal = 0, float inclinacion_vertical = 0, float angulo_direccion = 0);
     void draw(_modo modo, float r, float g, float b, float grosor);
 protected:

@@ -50,6 +50,17 @@ _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
 
+typedef enum {
+	INICIO,
+	ENCENDIDO_MOTOR,
+	APERTURA_ALERONES,
+	COMPROBACION_DIRECCION,
+	DESPEGUE,
+	FINAL
+} paso_animacion;
+paso_animacion paso = INICIO;
+bool reproducir_animacion = false;
+
 //**************************************************************************
 //
 //***************************************************************************
@@ -157,9 +168,30 @@ void draw_objects()
 		extrusion->draw(modo, 1.0, 0.0, 0.0, 5);
 		break;
 	case JERARQUICO:
+		glPushMatrix();
+		glTranslatef(jerarquico->posicion.x, jerarquico->posicion.y, jerarquico->posicion.z);
 		jerarquico->draw(modo, 1.0, 0.0, 0.0, 5);
+		glPopMatrix();
 		break;
 	}
+}
+
+static void animate() {
+	if (reproducir_animacion) {
+		switch (paso)
+		{
+		case INICIO:
+			jerarquico->posicion = _vertex3f(0,0,0);
+			paso = ENCENDIDO_MOTOR; // paso += 1
+			break;
+		case ENCENDIDO_MOTOR:
+			jerarquico->rotacion_helice += 5;
+			break;
+		default:
+			break;
+		}
+	}
+	glutPostRedisplay();
 }
 
 //**************************************************************************
@@ -251,6 +283,12 @@ void normal_key(unsigned char Tecla1, int x, int y)
 	case 'A':
 		t_objeto = JERARQUICO;
 		break;
+	case 'S':
+		reproducir_animacion = !reproducir_animacion;
+		if (!reproducir_animacion) {
+			jerarquico->posicion = _vertex3f(0,0,0);
+		}
+		break;
 	}
 	glutPostRedisplay();
 }
@@ -288,6 +326,36 @@ void special_key(int Tecla1, int x, int y)
 	case GLUT_KEY_PAGE_DOWN:
 		Observer_distance /= 1.2;
 		break;
+	case GLUT_KEY_F1:
+		if (jerarquico->apertura_alerones >= 0 && jerarquico->apertura_alerones < 45)
+			jerarquico->apertura_alerones += 1;
+		break;
+	case GLUT_KEY_F2:
+		if (jerarquico->apertura_alerones > 0 && jerarquico->apertura_alerones <= 45)
+			jerarquico->apertura_alerones -= 1;
+		break;
+	case GLUT_KEY_F3:
+		jerarquico->rotacion_helice = int(jerarquico->rotacion_helice + 5) % 360;
+		break;
+	case GLUT_KEY_F4:
+		jerarquico->rotacion_helice = int(jerarquico->rotacion_helice - 5) % 360;
+		break;
+	case GLUT_KEY_F5:
+		if (jerarquico->apertura_tren >= -15 && jerarquico->apertura_tren < 90)
+			jerarquico->apertura_tren += 1;
+		break;
+	case GLUT_KEY_F6:
+		if (jerarquico->apertura_tren > -15 && jerarquico->apertura_tren <= 90)
+			jerarquico->apertura_tren -= 1;
+		break;
+	case GLUT_KEY_F7:
+		if (jerarquico->direccion_timon >= -20 && jerarquico->direccion_timon < 20)
+			jerarquico->direccion_timon += 1;
+		break;
+	case GLUT_KEY_F8:
+		if (jerarquico->direccion_timon > -20 && jerarquico->direccion_timon <= 20)
+			jerarquico->direccion_timon -= 1;
+		break;
 	}
 	glutPostRedisplay();
 }
@@ -315,6 +383,7 @@ void print_controls() {
 	 * L: Objeto por rotacion mediante perfil PLY
 	 * X: Objeto por extrusion
 	 * A: Objeto jerarquico
+	 * S: Animacion modelo jerarquico
 	 * ---------------------------
 	 */
 	std::cout << "\t\t---------- CONTROLES ----------\t\t\n"
@@ -336,15 +405,16 @@ void print_controls() {
 			  << "[L]\t->\tDibujar objeto por mediante perfil PLY\n"
 			  << "[X]\t->\tDibujar objeto por mediante perfil PLY\n"
 			  << "[A]\t->\tDibujar objeto jerarquico (avion)\n"
+			  << "[S]\t->\tAnimacion objeto jerarquico\n"
 			  << "\t--- Controles del objeto jerarquico ---\n"
-			  << "[F1]\t->\t???\n"
-			  << "[F2]\t->\t???\n"
-			  << "[F3]\t->\t???\n"
-			  << "[F4]\t->\t???\n"
-			  << "[F5]\t->\t???\n"
-			  << "[F6]\t->\t???\n"
-			  << "[F7]\t->\t???\n"
-			  << "[F8]\t->\t???\n"
+			  << "[F1]\t->\tAbrir alerones\n"
+			  << "[F2]\t->\tCerrar alerones\n"
+			  << "[F3]\t->\tRotar helice en sentido horario\n"
+			  << "[F4]\t->\tRotar helice en sentido antihorario\n"
+			  << "[F5]\t->\tGuardar trenes de aterrizaje\n"
+			  << "[F6]\t->\tDesplegar trenes de aterrizaje\n"
+			  << "[F7]\t->\tAjustar timon hacia la izquierda\n"
+			  << "[F8]\t->\tAjustar timon hacia la derecha\n"
 			  << "[F9]\t->\t???\n"
 			  << "[F10]\t->\t???\n"
 			  << "[F11]\t->\t???\n"
@@ -456,6 +526,8 @@ int main(int argc, char *argv[])
 	glutKeyboardFunc(normal_key);
 	// asignación de la funcion llamada "tecla_Especial" al evento correspondiente
 	glutSpecialFunc(special_key);
+
+	glutIdleFunc(animate);
 
 	// funcion de inicialización
 	initialize();
