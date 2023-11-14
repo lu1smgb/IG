@@ -25,12 +25,13 @@ typedef enum
 	JERARQUICO
 } _tipo_objeto;
 _tipo_objeto t_objeto = JERARQUICO;
-_modo modo = SOLID_COLORS;
+_modo modo = SOLID;
 
 // variables que definen la posicion de la camara en coordenadas polares
 GLfloat Observer_distance;
 GLfloat Observer_angle_x;
 GLfloat Observer_angle_y;
+_vertex3f previous_observer_state;
 
 // variables que controlan la ventana y la transformacion de perspectiva
 GLfloat Size_x, Size_y, Front_plane, Back_plane;
@@ -50,11 +51,17 @@ _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
 
-typedef enum {
+typedef enum
+{
 	INICIO,
 	ENCENDIDO_MOTOR,
 	APERTURA_ALERONES,
-	COMPROBACION_DIRECCION,
+	COMPROBACION_TIMON_1,
+	COMPROBACION_TIMON_2,
+	COMPROBACION_TIMON_3,
+	ACELERACION_1,
+	ACELERACION_2,
+	ACELERACION_3,
 	DESPEGUE,
 	FINAL
 } paso_animacion;
@@ -92,7 +99,6 @@ void change_projection()
 
 void change_observer()
 {
-
 	// posicion del observador
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -134,10 +140,197 @@ void draw_axis()
 
 //**************************************************************************
 // Funcion que dibuja los objetos
-//****************************2***********************************************
+//**************************************************************************
+
+// Cambia la posicion de la camara
+void change_observer_values(float x, float y, float d)
+{
+	Observer_angle_x = x;
+	Observer_angle_y = y;
+	Observer_distance = d;
+}
+
+// Realiza un incremento sobre los angulos y distancia de la camara
+void iterate_observer(float x, float y, float d)
+{
+	Observer_angle_x += x;
+	Observer_angle_y += y;
+	Observer_distance += d;
+}
+
+// Restaura la posicion de la camara
+void restore_observer()
+{
+	Observer_angle_x = previous_observer_state._0;
+	Observer_angle_y = previous_observer_state._1;
+	Observer_distance = previous_observer_state._2;
+}
+
+// Reproduce la animacion si esta detenida, y la detiene si esta en curso
+// Restaura los valores del modelo
+// Si la animacion va a detenerse, restaura la camara a como estaba antes de empezar la animacion
+void alternar_animacion()
+{
+	// Si la animacion esta en curso, restauramos la camara
+	if (reproducir_animacion)
+	{
+		std::cout << "\t--- ANIMACION DETENIDA ---\n";
+		restore_observer();
+	}
+	// Al iniciar/detener la animacion, restauramos los valores del modelo
+	jerarquico->reset_model_values();
+	reproducir_animacion = !reproducir_animacion;
+	//// std::cout << reproducir_animacion << "\n";
+	paso = INICIO;
+}
+
+// Rota la helice 'angulo' grados
+// TODO: Pasar este metodo junto con otros a la clase _avion
+void rotar_helice(float angulo)
+{
+	jerarquico->rotacion_helice = int(jerarquico->rotacion_helice + angulo) % 360;
+}
+
+// Funcion de animacion del modelo
+static void animate()
+{
+	// Apaga la animacion si esta en curso y se ha cambiado el objeto a dibujar
+	if (t_objeto != JERARQUICO && reproducir_animacion) {
+		alternar_animacion();
+	}
+
+	else if (reproducir_animacion)
+	{
+		switch (paso)
+		{
+		// Usamos este paso para salvaguardar los valores de la camara
+		// y despues poder modificarla para la animacion
+		case INICIO:
+			std::cout << "\t--- ANIMACION INICIADA ---\n";
+			previous_observer_state(Observer_angle_x, Observer_angle_y, Observer_distance);
+			change_observer_values(-1, 0, 4);
+			std::cout << "Encendiendo motores...\n";
+			paso = ENCENDIDO_MOTOR;
+			break;
+
+		// La helice empieza a girar un total de 3 veces antes del siguiente paso
+		case ENCENDIDO_MOTOR:
+			rotar_helice(3);
+			Observer_distance += 0.005;
+			if (Observer_distance >= 5)
+			{
+				std::cout << "Abriendo alerones...\n";
+				paso = APERTURA_ALERONES;
+				change_observer_values(5, -73, 9);
+			}
+			break;
+
+		// Los alerones se abren 45 grados antes de pasar al siguiente paso
+		case APERTURA_ALERONES:
+			// A partir de ahora rotaremos la helice mas rapido en toda la animacion
+			rotar_helice(5);
+			jerarquico->apertura_alerones += 0.25;
+			iterate_observer(-0.01, -0.25, -0.01);
+			if (jerarquico->apertura_alerones >= 45)
+			{
+				std::cout << "Comprobando timon por la izquierda...\n";
+				paso = COMPROBACION_TIMON_1;
+				change_observer_values(17, -180, 4);
+			}
+			break;
+
+		case COMPROBACION_TIMON_1:
+			rotar_helice(6);
+			jerarquico->direccion_timon += 0.5;
+			Observer_distance += 0.01;
+			if (jerarquico->direccion_timon >= 20)
+			{
+				std::cout << "Comprobando timon por la derecha...\n";
+				paso = COMPROBACION_TIMON_2;
+			}
+			break;
+
+		case COMPROBACION_TIMON_2:
+			rotar_helice(9);
+			jerarquico->direccion_timon -= 0.5;
+			Observer_distance += 0.01;
+			if (jerarquico->direccion_timon <= -20)
+			{
+				std::cout << "Centrando timon...\n";
+				paso = COMPROBACION_TIMON_3;
+			}
+			break;
+
+		case COMPROBACION_TIMON_3:
+			rotar_helice(10);
+			jerarquico->direccion_timon += 0.5;
+			Observer_distance += 0.01;
+			if (jerarquico->direccion_timon == 0)
+			{
+				std::cout << "Preparando para el despegue...\n";
+				paso = ACELERACION_1;
+				jerarquico->posicion(0, 0, -5);
+				change_observer_values(0, 0, 8);
+			}
+			break;
+
+		case ACELERACION_1:
+			rotar_helice(12);
+			jerarquico->posicion.z += 0.02;
+			if (jerarquico->posicion.z >= -1)
+			{
+				std::cout << "Despegando, guardando trenes de aterrizaje..." << std::endl;
+				paso = ACELERACION_2;
+				change_observer_values(0, -90, 8);
+			}
+			break;
+
+		// El avion despega y se guarda el tren de aterrizaje
+		case ACELERACION_2:
+			rotar_helice(15);
+			jerarquico->posicion.z += 0.04;
+			jerarquico->posicion.y += 0.01;
+			jerarquico->apertura_tren += 1;
+			jerarquico->inclinacion_vertical -= 0.1;
+			if (jerarquico->posicion.z >= 4 && jerarquico->apertura_tren >= 45)
+			{
+				paso = ACELERACION_3;
+				change_observer_values(-5, -180, 8);
+			}
+			break;
+
+		// Por ultimo, el avion empieza a dirigirse hacia el horizonte
+		case ACELERACION_3:
+			rotar_helice(15);
+			jerarquico->posicion.z += 0.08;
+			jerarquico->posicion.y += 0.04;
+			jerarquico->inclinacion_vertical -= 0.1;
+			if (jerarquico->posicion.z >= 20)
+			{
+				paso = FINAL;
+			}
+			break;
+
+		// Final de la animacion, se realizan las operaciones necesarias
+		case FINAL:
+			alternar_animacion();
+			break;
+
+		default:
+			break;
+		}
+	}
+	glutPostRedisplay();
+}
 
 void draw_objects()
 {
+	// Si se va a cambiar de objeto cuando se este reproduciendo la animacion
+	// entonces se detendra automaticamente
+	if (t_objeto != JERARQUICO && reproducir_animacion) {
+		alternar_animacion();
+	}
+
 	switch (t_objeto)
 	{
 	case CUBO:
@@ -168,30 +361,9 @@ void draw_objects()
 		extrusion->draw(modo, 1.0, 0.0, 0.0, 5);
 		break;
 	case JERARQUICO:
-		glPushMatrix();
-		glTranslatef(jerarquico->posicion.x, jerarquico->posicion.y, jerarquico->posicion.z);
 		jerarquico->draw(modo, 1.0, 0.0, 0.0, 5);
-		glPopMatrix();
 		break;
 	}
-}
-
-static void animate() {
-	if (reproducir_animacion) {
-		switch (paso)
-		{
-		case INICIO:
-			jerarquico->posicion = _vertex3f(0,0,0);
-			paso = ENCENDIDO_MOTOR; // paso += 1
-			break;
-		case ENCENDIDO_MOTOR:
-			jerarquico->rotacion_helice += 5;
-			break;
-		default:
-			break;
-		}
-	}
-	glutPostRedisplay();
 }
 
 //**************************************************************************
@@ -284,10 +456,13 @@ void normal_key(unsigned char Tecla1, int x, int y)
 		t_objeto = JERARQUICO;
 		break;
 	case 'S':
-		reproducir_animacion = !reproducir_animacion;
-		if (!reproducir_animacion) {
-			jerarquico->posicion = _vertex3f(0,0,0);
-		}
+		if (t_objeto == JERARQUICO)
+			alternar_animacion();
+		break;
+	case '\\':
+		std::cout << "Observer_angle_x: " << Observer_angle_x
+				  << "\nObserver_angle_y: " << Observer_angle_y
+				  << "\nObserver_distance: " << Observer_distance << "\n";
 		break;
 	}
 	glutPostRedisplay();
@@ -305,6 +480,10 @@ void normal_key(unsigned char Tecla1, int x, int y)
 
 void special_key(int Tecla1, int x, int y)
 {
+
+	// Los controles de camara y de articulaciones
+	// permaneceran bloqueados durante la animacion
+	if (reproducir_animacion) return;
 
 	switch (Tecla1)
 	{
@@ -405,7 +584,7 @@ void print_controls() {
 			  << "[L]\t->\tDibujar objeto por mediante perfil PLY\n"
 			  << "[X]\t->\tDibujar objeto por mediante perfil PLY\n"
 			  << "[A]\t->\tDibujar objeto jerarquico (avion)\n"
-			  << "[S]\t->\tAnimacion objeto jerarquico\n"
+			  << "[S]\t->\tIniciar/detener animacion (objeto jerarquico)\n"
 			  << "\t--- Controles del objeto jerarquico ---\n"
 			  << "[F1]\t->\tAbrir alerones\n"
 			  << "[F2]\t->\tCerrar alerones\n"
@@ -415,10 +594,9 @@ void print_controls() {
 			  << "[F6]\t->\tDesplegar trenes de aterrizaje\n"
 			  << "[F7]\t->\tAjustar timon hacia la izquierda\n"
 			  << "[F8]\t->\tAjustar timon hacia la derecha\n"
-			  << "[F9]\t->\t???\n"
-			  << "[F10]\t->\t???\n"
-			  << "[F11]\t->\t???\n"
-			  << "[F12]\t->\t???\n";
+			  << "\t--- Utilidades ---\n"
+			  << "[\\]\t->\tMostrar coordenadas de camara\n"
+			  << "\n";
 }
 
 void initialize(void)
@@ -535,7 +713,7 @@ int main(int argc, char *argv[])
 	// creación del objeto ply
 	ply.parametros(argv[1]);
 
-	rotacion_ply.parametros("peon.perfil", 10, true, false);
+	rotacion_ply.parametros("peon.perfil", 10);
 
 	// ply = new _objeto_ply(argv[1]);
 

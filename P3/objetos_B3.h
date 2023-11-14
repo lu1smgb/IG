@@ -161,7 +161,7 @@ public:
     float grosor; // Longitud en el eje Y
     float anchura; // Longitud en el eje Z
     float apertura_aleron;
-    _ala(float longitud = 3, float grosor = 0.1, float anchura = 1, float apertura_aleron = 30);
+    _ala(float longitud = 5, float grosor = 0.1, float anchura = 1, float apertura_aleron = 30);
     void draw(_modo modo, float r, float g, float b, float grosor);
 protected:
     _cubo cubo;
@@ -190,7 +190,7 @@ public:
     float margen;
     float longitud_brazo;
     unsigned short int num_helices;
-    _helice(float longitud = 5, float grosor = 0.25, float anchura = 1, float inclinacion = 15, 
+    _helice(float longitud = 5, float grosor = 0.25, float anchura = 1, float inclinacion = 45, 
             float margen = 1, float num_helices = 4, float longitud_brazo = 2);
     void draw(_modo modo, float r, float g, float b, float grosor);
 protected:
@@ -200,10 +200,10 @@ protected:
 
 class _tren_aterrizaje : public _triangulos3D {
 public:
-    float diametro_rueda;
+    float radio_rueda;
     float longitud_brazo;
     // Aniadir inclinacion sobre eje X
-    _tren_aterrizaje(float diametro_rueda = 0.5, float longitud_brazo = 2);
+    _tren_aterrizaje(float radio_rueda = 0.5, float longitud_brazo = 2);
     void draw(_modo modo, float r, float g, float b, float grosor);
 protected:
     _cilindro cilindro;
@@ -249,6 +249,7 @@ public:
 
     _avion(float inclinacion_horizontal = 0, float inclinacion_vertical = 0, float angulo_direccion = 0);
     void draw(_modo modo, float r, float g, float b, float grosor);
+    void reset_model_values();
 protected:
     _fuselaje fuselaje;
     _ala ala;

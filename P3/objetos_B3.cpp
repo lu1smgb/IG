@@ -35,7 +35,7 @@ void _puntos3D::draw_puntos(float r, float g, float b, int grosor)
 
 _triangulos3D::_triangulos3D()
 {
-    random_color_preset = 2;
+    random_color_preset = 1;
 }
 
 //*************************************************************************
@@ -620,23 +620,27 @@ void _ala::draw(_modo modo, float r, float g, float b, float grosor)
     const float PROPORCION_INFERIOR = 0.6;
     const float PROPORCION_TRASERA = 1 - PROPORCION_DELANTERA;
     const float PROPORCION_SUPERIOR = 1 - PROPORCION_INFERIOR;
+
+    // Parte delantera inmovil
     glPushMatrix();
     glTranslatef(0, 0, this->anchura * PROPORCION_DELANTERA / 2);
     glScalef(this->longitud, this->grosor, this->anchura * PROPORCION_DELANTERA);
-    cubo.draw(modo, r, g, b, grosor);
+    cubo.draw(modo, 0.2, 0.2, 0.2, grosor);
     glPopMatrix();
 
+    // Parte trasera inferior inmovil
     glPushMatrix();
     glTranslatef(0, 0, -this->anchura * PROPORCION_TRASERA / 2);
     glTranslatef(0, -this->grosor * PROPORCION_SUPERIOR / 2, 0);
     glScalef(this->longitud, this->grosor * PROPORCION_INFERIOR, this->anchura * PROPORCION_TRASERA);
-    cubo.draw(modo, r, g, b, grosor);
+    cubo.draw(modo, 0.2, 0.2, 0.2, grosor);
     glPopMatrix();
 
+    // Parte trasera superior movil (aleron)
     glPushMatrix();
     glRotatef(apertura_aleron, 1, 0, 0);
     glScalef(this->longitud, this->grosor * PROPORCION_SUPERIOR, this->anchura * PROPORCION_TRASERA);
-    aleron.draw(modo, r, g, b, grosor);
+    aleron.draw(modo, 0.1, 0.3, 0.9, grosor);
     glPopMatrix();
 }
 
@@ -692,7 +696,7 @@ void _helice::draw(_modo modo, float r, float g, float b, float grosor)
     glTranslatef(0, 0, longitud_brazo / 2);
     glRotatef(90, 1, 0, 0);
     glScalef(DIM_XZ / 2, longitud_brazo, DIM_XZ / 2);
-    eje.draw(modo, r, g, b, grosor);
+    eje.draw(modo, 0.1, 0.5, 1, grosor);
     glPopMatrix();
     
     glPushMatrix();
@@ -700,20 +704,20 @@ void _helice::draw(_modo modo, float r, float g, float b, float grosor)
         glPushMatrix();
         glRotatef(90, 1, 0, 0);
         glScalef(DIM_XZ, DIM_Y, DIM_XZ);
-        eje.draw(modo, r, g, b, grosor);
+        eje.draw(modo, 0.1, 0.5, 1, grosor);
         glPopMatrix();
 
         glPushMatrix();
         for (unsigned short int i = 0; i < num_helices; i++) {
             glRotatef(360 / num_helices, 0, 0, 1);
-            aspa.draw(modo, r, g, b, grosor);
+            aspa.draw(modo, 0.2, 0.2, 1, grosor);
         }
         glPopMatrix();
     glPopMatrix();
 }
 
-_tren_aterrizaje::_tren_aterrizaje(float diametro_rueda, float longitud_brazo) {
-    this->diametro_rueda = diametro_rueda;
+_tren_aterrizaje::_tren_aterrizaje(float radio_rueda, float longitud_brazo) {
+    this->radio_rueda = radio_rueda;
     this->longitud_brazo = longitud_brazo;
     this->cilindro = _cilindro();
 }
@@ -723,14 +727,14 @@ void _tren_aterrizaje::draw(_modo modo, float r, float g, float b, float grosor)
     glPushMatrix();
     glTranslatef(0, -this->longitud_brazo / 2, 0);
     glScalef(0.25, this->longitud_brazo, 0.25);
-    cilindro.draw(modo, r, g, b, grosor);
+    cilindro.draw(modo, 0.3, 0.3, 0.3, grosor);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(0, -this->longitud_brazo, 0);
     glRotatef(90, 0, 0, 1);
-    glScalef(diametro_rueda, 0.5, diametro_rueda);
-    cilindro.draw(modo, r, g, b, grosor);
+    glScalef(radio_rueda, 0.5, radio_rueda);
+    cilindro.draw(modo, 0.2, 0.2, 0.2, grosor);
     glPopMatrix();
 
 }
@@ -747,7 +751,7 @@ void _fuselaje::draw(_modo modo, float r, float g, float b, float grosor) {
 
     glPushMatrix();
     glScalef(this->anchura, this->altura / 2, this->longitud);
-    cubo.draw(modo, r, g, b, grosor);
+    cubo.draw(modo, 0.2, 0.2, 0.2, grosor);
     glPopMatrix();
 
     const float LONGITUD_RETROVISOR = this->longitud * 0.2;
@@ -758,14 +762,14 @@ void _fuselaje::draw(_modo modo, float r, float g, float b, float grosor) {
     glTranslatef(0, this->altura / 4, this->longitud / 2);
     glRotatef(INCLINACION_RETROVISOR, 1, 0, 0);
     glScalef(this->anchura, 0.05, LONGITUD_RETROVISOR);
-    retrovisor.draw(modo, r, g, b, grosor);
+    retrovisor.draw(modo, 0, 0.6, 0.9, grosor);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(0, this->altura / 4, this->longitud / 4 - LONGITUD_RETROVISOR * cos(RAD_INCL));
     glTranslatef(0, ALTURA_CABINA / 2, 0);
     glScalef(this->anchura, ALTURA_CABINA, this->longitud / 2);
-    cubo.draw(modo, r, g, b, grosor);
+    cubo.draw(modo, 0.15, 0.15, 0.15, grosor);
     glPopMatrix();
 }
 
@@ -815,6 +819,7 @@ void _avion::draw(_modo modo, float r, float g, float b, float grosor)
     ala.apertura_aleron = this->apertura_alerones;
 
     glPushMatrix();
+    glTranslatef(posicion.x, posicion.y, posicion.z); // Posicion del avion en el mundo
     glRotatef(inclinacion_horizontal, 0, 0, 1);
     glRotatef(angulo_direccion, 0, 1, 0);
     glRotatef(inclinacion_vertical, 1, 0, 0);
@@ -854,9 +859,9 @@ void _avion::draw(_modo modo, float r, float g, float b, float grosor)
 
         // Timon
         glPushMatrix();
-        glTranslatef(0, 0, timon.longitud - fuselaje.longitud / 2);
+        glTranslatef(0, fuselaje.altura / 4, timon.longitud - fuselaje.longitud / 2);
         glRotatef(direccion_timon, 0, 1, 0);
-        timon.draw(modo, r, g, b, grosor);
+        timon.draw(modo, 0.1, 0.3, 0.9, grosor);
         glPopMatrix();
 
         // Helice
@@ -891,4 +896,16 @@ void _avion::draw(_modo modo, float r, float g, float b, float grosor)
         glPopMatrix();
 
     glPopMatrix();
+}
+
+// Restaura los valores del modelo (posicion, articulaciones, etc.)
+void _avion::reset_model_values() {
+    this->posicion(0, 0, 0);
+    this->inclinacion_horizontal = 0;
+    this->inclinacion_vertical = 0;
+    this->angulo_direccion = 0;
+    this->rotacion_helice = 0;
+    this->apertura_tren = -15;
+    this->direccion_timon = 0;
+    this->apertura_alerones = 0;
 }
