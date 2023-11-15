@@ -979,3 +979,61 @@ void _avion::reset_model_values() {
     this->direccion_timon = 0;
     this->apertura_alerones = 0;
 }
+
+_ejercicio3::_ejercicio3() {
+    this->x_primer_cono = -1;
+    this->longitud_prisma_1 = 3;
+    this->longitud_prisma_2 = 2;
+    this->altura_cono_1 = 1;
+    this->altura_cono_2 = 1.2;
+    this->grado_1 = 30;
+    this->grado_2 = 30;
+}
+
+void _ejercicio3::draw(_modo modo, float r, float g, float b, float grosor) {
+
+    glPushMatrix();
+    glTranslatef(x_primer_cono, 0, 0);
+    glRotatef(grado_1, 0, 1, 0);
+
+        // Ahora construimos a partir del centro del primer cono
+        glPushMatrix();
+        glTranslatef(0, altura_cono_1 / 2, 0);
+            // Primer cono
+            glPushMatrix();
+            glScalef(1, altura_cono_1, 1);
+            cono.draw(modo, r, g, b, grosor);
+            glPopMatrix();
+
+            glPushMatrix();
+            glTranslatef(0, 0.1 + (altura_cono_1 / 2), 0);
+
+                glPushMatrix();
+                glTranslatef(longitud_prisma_1 / 3, 0, 0);
+                glScalef(longitud_prisma_1, 0.2, 0.5);
+                cubo.draw(modo, r, g, b, grosor);
+                glPopMatrix();
+
+                glPushMatrix();
+                glTranslatef(longitud_prisma_1 / 2, 0.1 + (altura_cono_2 / 2), 0);
+                glRotatef(grado_2, 0, 1, 0);
+                    glPushMatrix();
+                    glScalef(0.6, altura_cono_2, 0.6);
+                    cono.draw(modo, r, g, b, grosor);
+                    glPopMatrix();
+                    glTranslatef(0, altura_cono_2 / 2, 0);
+
+                    glPushMatrix();
+                    glScalef(longitud_prisma_2, 0.2, 0.5);
+                    cubo.draw(modo, r, g, b, grosor);
+                    glPopMatrix();
+                glPopMatrix();
+
+                glPopMatrix();
+            glPopMatrix();
+
+        glPopMatrix();
+
+    glPopMatrix();
+
+}

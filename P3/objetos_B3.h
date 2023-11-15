@@ -273,3 +273,20 @@ protected:
     _helice helice;
     _timon timon;
 };
+
+//! EXAMEN
+class _ejercicio3 : public _triangulos3D {
+public:
+    float x_primer_cono;
+    float longitud_prisma_1;
+    float longitud_prisma_2;
+    float altura_cono_1;
+    float altura_cono_2;
+    float grado_1;
+    float grado_2;
+    _ejercicio3();
+    void draw(_modo modo, float r, float g, float b, float grosor);
+protected:
+    _cono cono;
+    _cubo cubo;
+};

@@ -55,6 +55,7 @@ _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
 _ejercicio1 ejercicio1;
 _ejercicio2 ejercicio2;
+_ejercicio3 *ejercicio3 = new _ejercicio3();
 
 typedef enum
 {
@@ -375,6 +376,7 @@ void draw_objects()
 		ejercicio2.draw(modo, 0.8, 0.0, 0.0, 5);
 		break;
 	case EJERCICIO3:
+		ejercicio3->draw(modo, 0.8, 0.0, 0.0, 5);
 		break;
 	}
 }
@@ -558,6 +560,26 @@ void special_key(int Tecla1, int x, int y)
 			jerarquico->direccion_timon -= 1;
 		break;
 	//! EXAMEN: ARTICULACIONES
+	case GLUT_KEY_F9:
+		if (t_objeto == EJERCICIO3) {
+			ejercicio3->grado_1 += 5;
+		}
+		break;
+	case GLUT_KEY_F10:
+		if (t_objeto == EJERCICIO3) {
+			ejercicio3->grado_1 -= 5;
+		}
+		break;
+	case GLUT_KEY_F11:
+		if (t_objeto == EJERCICIO3) {
+			ejercicio3->grado_2 += 5;
+		}
+		break;
+	case GLUT_KEY_F12:
+		if (t_objeto == EJERCICIO3) {
+			ejercicio3->grado_2 -= 5;
+		}
+		break;
 	}
 	glutPostRedisplay();
 }
@@ -623,6 +645,10 @@ void print_controls() {
 			  << "[,]\t->\tEjercicio 1\n"
 			  << "[.]\t->\tEjercicio 2\n"
 			  << "[/]\t->\tEjercicio 3\n"
+			  << "[F9]\t->\tAumentar 1er grado\n"
+			  << "[F10]\t->\tDecrementar 1er grado\n"
+			  << "[F11]\t->\tAumentar 2o grado\n"
+			  << "[F12]\t->\tDecrementar 2o grado\n"
 			  << "\n";
 }
 
