@@ -147,6 +147,16 @@ public:
     _ejercicio1(float size = 0.5, float altura = 1);
 };
 
+class _ejercicio2 : public _rotacion {
+private:
+    const float RADIO_CURVA = 0.5;
+    const float ANCHURA_TOTAL = 1.25;
+    const float ALTURA_TOTAL = 1;
+    const unsigned short CALIDAD_CURVAS = 10;
+public:
+    _ejercicio2();
+};
+
 // *********************************************************************************
 //                          Practica 3 - Modelo Jerarquico
 // UN AVION

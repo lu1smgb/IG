@@ -557,6 +557,35 @@ _esfera::_esfera(float radio, unsigned num_x, unsigned num_y, bool tapa_inferior
     parametros(perfil, num_x, tapa_inferior, tapa_superior);
 };
 
+//! EXAMEN
+_ejercicio2::_ejercicio2() {
+
+    vector<_vertex3f> perfil;
+
+    // Curva superior
+    for (unsigned short i = 0; i < CALIDAD_CURVAS; i++) {
+        float alpha = (float)i / (float)(CALIDAD_CURVAS - 1);
+        float alpha_radianes = (M_PI / 2) + (alpha * (M_PI / 2));
+        float x = ANCHURA_TOTAL - (RADIO_CURVA * cos(alpha_radianes));
+        float y = ALTURA_TOTAL  - (RADIO_CURVA * sin(alpha_radianes));
+        _vertex3f punto(x,y,0);
+        perfil.push_back(punto);
+    }
+    // Curva inferior
+    for (unsigned short i = 0; i < CALIDAD_CURVAS; i++)
+    {
+        float alpha = (float)i / (float)(CALIDAD_CURVAS - 1);
+        float alpha_radianes = (M_PI / 2) + (alpha * (M_PI / 2));
+        float x = (0.75)             - (RADIO_CURVA * cos(alpha_radianes));
+        float y = (ALTURA_TOTAL / 2) - (RADIO_CURVA * sin(alpha_radianes));
+        _vertex3f punto(x, y, 0);
+        perfil.push_back(punto);
+    }
+
+    parametros(perfil, CALIDAD_CURVAS, true, false);
+
+}
+
 //************************************************************************
 // objeto por extrusión
 //************************************************************************

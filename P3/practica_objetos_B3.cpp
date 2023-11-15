@@ -28,7 +28,7 @@ typedef enum
 	EJERCICIO3
 } _tipo_objeto;
 _tipo_objeto t_objeto = JERARQUICO;
-_modo modo = SOLID;
+_modo modo = SOLID_COLORS;
 
 // variables que definen la posicion de la camara en coordenadas polares
 GLfloat Observer_distance;
@@ -54,6 +54,7 @@ _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
 _ejercicio1 ejercicio1;
+_ejercicio2 ejercicio2;
 
 typedef enum
 {
@@ -369,6 +370,11 @@ void draw_objects()
 		break;
 	case EJERCICIO1:
 		ejercicio1.draw(modo, 0.8, 0.0, 0.0, 5);
+		break;
+	case EJERCICIO2:
+		ejercicio2.draw(modo, 0.8, 0.0, 0.0, 5);
+		break;
+	case EJERCICIO3:
 		break;
 	}
 }
