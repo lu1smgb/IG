@@ -29,4 +29,18 @@
 
 ## Práctica 3 - Modelos jerárquicos
 
-*En progreso*
+**Objetivos**:
+- Comprender como funciona la pila de transformaciones de OpenGL
+- Realizar un modelo jerarquico con al menos 4 articulaciones (en este caso, una avioneta), modelando primero:
+  - Alas con alerones
+  - Helice de 4 aspas
+  - Trenes de aterrizaje
+  - Timon trasero
+  - Fuselaje (cuerpo de la avioneta)
+- Una animacion utilizando dicho modelo
+
+*Me acabo de dar cuenta de que la capturadora me convierte los azules en morados y no tengo ni idea de por que* 🫤
+
+<img width=300 src="img/p3_0.png"><img width=300 src="img/p3_1.png">
+
+<img width=300 src="img/p3_2.png"><img width=300 src="img/p3_3.png">
