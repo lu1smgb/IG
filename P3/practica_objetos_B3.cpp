@@ -22,7 +22,10 @@ typedef enum
 	ROTACION,
 	ROTACION_PLY,
 	EXTRUSION,
-	JERARQUICO
+	JERARQUICO,
+	EJERCICIO1,
+	EJERCICIO2,
+	EJERCICIO3
 } _tipo_objeto;
 _tipo_objeto t_objeto = JERARQUICO;
 _modo modo = SOLID;
@@ -50,6 +53,7 @@ _rotacion rotacion;
 _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
+_ejercicio1 ejercicio1;
 
 typedef enum
 {
@@ -363,6 +367,9 @@ void draw_objects()
 	case JERARQUICO:
 		jerarquico->draw(modo, 1.0, 0.0, 0.0, 5);
 		break;
+	case EJERCICIO1:
+		ejercicio1.draw(modo, 0.8, 0.0, 0.0, 5);
+		break;
 	}
 }
 
@@ -464,6 +471,15 @@ void normal_key(unsigned char Tecla1, int x, int y)
 				  << "\nObserver_angle_y: " << Observer_angle_y
 				  << "\nObserver_distance: " << Observer_distance << "\n";
 		break;
+	case ',':
+		t_objeto = EJERCICIO1;
+		break;
+	case '.':
+		t_objeto = EJERCICIO2;
+		break;
+	case '/':
+		t_objeto = EJERCICIO3;
+		break;
 	}
 	glutPostRedisplay();
 }
@@ -535,6 +551,7 @@ void special_key(int Tecla1, int x, int y)
 		if (jerarquico->direccion_timon > -20 && jerarquico->direccion_timon <= 20)
 			jerarquico->direccion_timon -= 1;
 		break;
+	//! EXAMEN: ARTICULACIONES
 	}
 	glutPostRedisplay();
 }
@@ -596,6 +613,10 @@ void print_controls() {
 			  << "[F8]\t->\tAjustar timon hacia la derecha\n"
 			  << "\t--- Utilidades ---\n"
 			  << "[\\]\t->\tMostrar coordenadas de camara\n"
+			  << "\t--- Examen ---\n"
+			  << "[,]\t->\tEjercicio 1\n"
+			  << "[.]\t->\tEjercicio 2\n"
+			  << "[/]\t->\tEjercicio 3\n"
 			  << "\n";
 }
 

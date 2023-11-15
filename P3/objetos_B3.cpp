@@ -599,6 +599,47 @@ _extrusion::_extrusion(vector<_vertex3f> poligono, float x, float y, float z)
     colorear_caras_aleatorio();
 }
 
+//! EXAMEN
+_ejercicio1::_ejercicio1(float size, float altura) {
+
+    const float REDUCCION_BASE = 0.8;
+    // vertices
+	vertices.resize(9);
+    // Piramide
+	vertices[0].x = -size; vertices[0].y = 0;       vertices[0].z = size;
+	vertices[1].x = size;  vertices[1].y = 0;       vertices[1].z = size;
+	vertices[2].x = size;  vertices[2].y = 0;       vertices[2].z = -size;
+	vertices[3].x = -size; vertices[3].y = 0;       vertices[3].z = -size;
+	vertices[4].x = 0;     vertices[4].y = altura;  vertices[4].z = 0;
+    // Semipiramide
+    vertices[5](-size * REDUCCION_BASE, -altura / 2, size * REDUCCION_BASE);
+    vertices[6](size * REDUCCION_BASE, -altura / 2, size * REDUCCION_BASE);
+    vertices[7](size * REDUCCION_BASE, -altura / 2, -size * REDUCCION_BASE);
+    vertices[8](-size * REDUCCION_BASE, -altura / 2, -size * REDUCCION_BASE);
+
+    caras.resize(14);
+    // Piramide
+	caras[0]._0 = 0; caras[0]._1 = 1; caras[0]._2 = 4;
+	caras[1]._0 = 1; caras[1]._1 = 2; caras[1]._2 = 4;
+	caras[2]._0 = 2; caras[2]._1 = 3; caras[2]._2 = 4;
+	caras[3]._0 = 3; caras[3]._1 = 0; caras[3]._2 = 4;
+    // Semipiramide
+    caras[4](5, 6, 1);
+    caras[5](5, 1, 0);
+    caras[6](6, 7, 2);
+    caras[7](6, 2, 1);
+    caras[8](7, 8, 3);
+    caras[9](7, 3, 2);
+    caras[10](8, 5, 0);
+    caras[11](8, 0, 3);
+    // Base semipiramide
+    caras[12](5, 6, 7);
+    caras[13](7, 8, 5);
+
+    colorear_caras();
+
+}
+
 // *********************************************************************************
 //                          Practica 3 - Modelo Jerarquico
 // UN AVION

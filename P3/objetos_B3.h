@@ -141,6 +141,12 @@ public:
     _extrusion(vector<_vertex3f> poligono, float x, float y, float z);
 };
 
+//! EXAMEN
+class _ejercicio1 : public _triangulos3D {
+public:
+    _ejercicio1(float size = 0.5, float altura = 1);
+};
+
 // *********************************************************************************
 //                          Practica 3 - Modelo Jerarquico
 // UN AVION
