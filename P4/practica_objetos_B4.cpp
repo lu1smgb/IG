@@ -51,7 +51,7 @@ _rotacion rotacion;
 _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
-_montana montana(5, 0.5, 5);
+_montana montana(5, 2, 5);
 
 typedef enum
 {
@@ -69,6 +69,7 @@ typedef enum
 } paso_animacion;
 paso_animacion paso = INICIO;
 bool reproducir_animacion = false;
+bool dibujar_ejes = true;
 
 //**************************************************************************
 //
@@ -124,20 +125,29 @@ void draw_axis()
 
 	glDisable(GL_LIGHTING);
 	glLineWidth(2);
-	glBegin(GL_LINES);
-	// eje X, color rojo
-	glColor3f(1, 0, 0);
-	glVertex3f(-AXIS_SIZE, 0, 0);
-	glVertex3f(AXIS_SIZE, 0, 0);
-	// eje Y, color verde
-	glColor3f(0, 1, 0);
-	glVertex3f(0, -AXIS_SIZE, 0);
-	glVertex3f(0, AXIS_SIZE, 0);
-	// eje Z, color azul
-	glColor3f(0, 0, 1);
-	glVertex3f(0, 0, -AXIS_SIZE);
-	glVertex3f(0, 0, AXIS_SIZE);
-	glEnd();
+	if (dibujar_ejes) {
+		glBegin(GL_LINES);
+		// eje X, color rojo
+		glColor3f(1, 0, 0);
+		glVertex3f(-AXIS_SIZE, 0, 0);
+		glVertex3f(AXIS_SIZE, 0, 0);
+		// eje Y, color verde
+		glColor3f(0, 1, 0);
+		glVertex3f(0, -AXIS_SIZE, 0);
+		glVertex3f(0, AXIS_SIZE, 0);
+		// eje Z, color azul
+		glColor3f(0, 0, 1);
+		glVertex3f(0, 0, -AXIS_SIZE);
+		glVertex3f(0, 0, AXIS_SIZE);
+		glEnd();
+	}
+}
+
+void posicionar_luz0()
+{
+	const GLfloat luz_posicion[] = {5.0, 5.0, 5.0, 0.0};
+
+	glLightfv(GL_LIGHT0, GL_POSITION, luz_posicion);
 }
 
 //**************************************************************************
@@ -327,6 +337,7 @@ static void animate()
 
 void draw_objects()
 {
+
 	// Si se va a cambiar de objeto cuando se este reproduciendo la animacion
 	// entonces se detendra automaticamente
 	if (t_objeto != JERARQUICO && reproducir_animacion) {
@@ -380,6 +391,7 @@ void draw(void)
 	clean_window();
 	change_observer();
 	draw_axis();
+	posicionar_luz0();
 	draw_objects();
 	glutSwapBuffers();
 }
@@ -389,20 +401,14 @@ void setup_iluminacion() {
 	desactivarLuces();
 
 	const GLfloat luz_ambiente[] = {0.1, 0.1, 0.1, 1.0};
-	const GLfloat luz_especular[] = {1.0, 1.0, 1.0, 1.0};
+	const GLfloat luz_difusa[] = {0.6, 0.6, 0.6, 1.0};
+	const GLfloat luz_especular[] = {1, 1, 1, 1.0};
 	const GLfloat luz_focus[] = {0.0, 0.0, 0.0};
 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_especular);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, luz_focus);
-}
-
-void posicionar_luz0() {
-
-	const GLfloat luz_posicion[] = {5.0, 5.0, -5.0, 0.0};
-
-	glLightfv(GL_LIGHT0, GL_POSITION, luz_posicion);
-
 }
 
 //***************************************************************************
@@ -497,8 +503,10 @@ void normal_key(unsigned char Tecla1, int x, int y)
 				  << "\nObserver_distance: " << Observer_distance << "\n";
 		break;
 	case 'M':
-		montana = _montana(5, 1, 5);
+		montana = _montana(3, 0.5, 3);
 		t_objeto = MONTANA;
+	case '`':
+		dibujar_ejes = !dibujar_ejes;
 	}
 	glutPostRedisplay();
 }
@@ -633,6 +641,7 @@ void print_controls() {
 			  << "[F8]\t->\tAjustar timon hacia la derecha\n"
 			  << "\t--- Utilidades ---\n"
 			  << "[\\]\t->\tMostrar coordenadas de camara\n"
+			  << "[`]\t->\tMostrar/Ocultar ejes de coordenadas\n"
 			  << "\n";
 }
 
