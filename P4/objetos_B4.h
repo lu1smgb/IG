@@ -14,7 +14,9 @@ typedef enum
     POINTS,
     EDGES,
     SOLID,
-    SOLID_COLORS
+    SOLID_COLORS,
+    DIFUSSE_FLAT,
+    DIFUSSE_GOURAUD
 } _modo;
 
 //*************************************************************************
@@ -28,6 +30,7 @@ public:
     void draw_puntos(float r, float g, float b, int grosor);
 
     vector<_vertex3f> vertices;
+    vector<_vertex3f> colores_vertices;
 };
 
 //*************************************************************************
@@ -41,6 +44,8 @@ protected:
     _vertex3f color_aleatorio();
     void colorear_caras_aleatorio();
     void colorear_caras();
+    void calcular_normales_caras();
+    void calcular_normales_vertices();
 public:
     _triangulos3D();
     void draw_aristas(float r, float g, float b, int grosor);
@@ -48,9 +53,18 @@ public:
     void draw_solido_colores();
     void draw(_modo modo, float r, float g, float b, float grosor);
 
+    void draw_difuse_flat(_vertex3f color);
+    void draw_difuse_gouraud(_vertex3f color);
+
     vector<_vertex3i> caras;
     vector<_vertex3f> colores;
+    vector<_vertex3f> normales_caras;
+    vector<_vertex3f> normales_vertices;
 };
+
+bool iluminacionActivada();
+void activarLuces();
+void desactivarLuces();
 
 //*************************************************************************
 // clase cubo
@@ -256,4 +270,14 @@ protected:
     _tren_aterrizaje tren_aterrizaje;
     _helice helice;
     _timon timon;
+};
+
+// *************************************************************
+// * PRACTICA 4
+// *************************************************************
+
+class _montana : public _triangulos3D
+{
+public:
+    _montana(int nivelmax, float sigma, float h);
 };

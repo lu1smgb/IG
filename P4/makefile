@@ -3,7 +3,7 @@
 EJECUTABLE= practica_objetos_B4.out
 
 MODULOS:= practica_objetos_B4.o\
-         objetos_B3.o\
+         objetos_B4.o\
          file_ply_stl.o\
       
 LIBS:= -lglut -lGLU -lGL -lsupc++ -lm -lc -lstdc++ -lpthread -L/usr/lib/nvidia-331

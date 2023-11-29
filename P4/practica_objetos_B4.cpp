@@ -22,9 +22,10 @@ typedef enum
 	ROTACION,
 	ROTACION_PLY,
 	EXTRUSION,
-	JERARQUICO
+	JERARQUICO,
+	MONTANA
 } _tipo_objeto;
-_tipo_objeto t_objeto = JERARQUICO;
+_tipo_objeto t_objeto = CUBO;
 _modo modo = SOLID;
 
 // variables que definen la posicion de la camara en coordenadas polares
@@ -50,6 +51,7 @@ _rotacion rotacion;
 _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
+_montana montana(5, 0.5, 5);
 
 typedef enum
 {
@@ -74,7 +76,7 @@ bool reproducir_animacion = false;
 
 void clean_window()
 {
-
+	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -363,6 +365,9 @@ void draw_objects()
 	case JERARQUICO:
 		jerarquico->draw(modo, 1.0, 0.0, 0.0, 5);
 		break;
+	case MONTANA:
+		montana.draw(modo, 0.7, 0.7, 0.7, 5);
+		break;
 	}
 }
 
@@ -377,6 +382,27 @@ void draw(void)
 	draw_axis();
 	draw_objects();
 	glutSwapBuffers();
+}
+
+void setup_iluminacion() {
+
+	desactivarLuces();
+
+	const GLfloat luz_ambiente[] = {0.1, 0.1, 0.1, 1.0};
+	const GLfloat luz_especular[] = {1.0, 1.0, 1.0, 1.0};
+	const GLfloat luz_focus[] = {0.0, 0.0, 0.0};
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_especular);
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, luz_focus);
+}
+
+void posicionar_luz0() {
+
+	const GLfloat luz_posicion[] = {5.0, 5.0, -5.0, 0.0};
+
+	glLightfv(GL_LIGHT0, GL_POSITION, luz_posicion);
+
 }
 
 //***************************************************************************
@@ -425,6 +451,12 @@ void normal_key(unsigned char Tecla1, int x, int y)
 	case '4':
 		modo = SOLID_COLORS;
 		break;
+	case '5':
+		modo = DIFUSSE_FLAT;
+		break;
+	case '6':
+		modo = DIFUSSE_GOURAUD;
+		break;
 	case 'P':
 		t_objeto = PIRAMIDE;
 		break;
@@ -464,6 +496,9 @@ void normal_key(unsigned char Tecla1, int x, int y)
 				  << "\nObserver_angle_y: " << Observer_angle_y
 				  << "\nObserver_distance: " << Observer_distance << "\n";
 		break;
+	case 'M':
+		montana = _montana(5, 1, 5);
+		t_objeto = MONTANA;
 	}
 	glutPostRedisplay();
 }
@@ -574,6 +609,8 @@ void print_controls() {
 			  << "[2]\t->\tDibujado de aristas\n"
 			  << "[3]\t->\tDibujado de color solido\n"
 			  << "[4]\t->\tDibujado de color aleatorio\n"
+			  << "[5]\t->\tDibujado con iluminacion plana\n"
+			  << "[6]\t->\tDibujado con iluminacion Gouraud\n"
 			  << "[P]\t->\tDibujar piramide\n"
 			  << "[C]\t->\tDibujar cubo\n"
 			  << "[T]\t->\tDibujar cono\n"
@@ -620,6 +657,12 @@ void initialize(void)
 	glEnable(GL_DEPTH_TEST);
 	change_projection();
 	glViewport(0, 0, Window_width, Window_high);
+
+	// culling
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+
+	setup_iluminacion();
 }
 
 //***************************************************************************
@@ -694,7 +737,7 @@ int main(int argc, char *argv[])
 
 	// llamada para crear la ventana, indicando el titulo (no se visualiza hasta que se llama
 	// al bucle de eventos)
-	glutCreateWindow("Practica 3 IG - Luis Miguel Guirado Bautista");
+	glutCreateWindow("Practica 4 IG - Luis Miguel Guirado Bautista");
 
 	// asignación de la funcion llamada "dibujar" al evento de dibujo
 	glutDisplayFunc(draw);

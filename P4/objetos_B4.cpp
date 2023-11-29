@@ -4,6 +4,7 @@
 
 #include "objetos_B4.h"
 #include "file_ply_stl.h"
+#include <GL/glut.h>
 
 //*************************************************************************
 // _puntos3D
@@ -32,7 +33,7 @@ void _puntos3D::draw_puntos(float r, float g, float b, int grosor)
 
 _triangulos3D::_triangulos3D()
 {
-    random_color_preset = 1;
+    random_color_preset = 3;
 }
 
 //*************************************************************************
@@ -88,7 +89,14 @@ void _triangulos3D::draw_solido(float r, float g, float b)
 void _triangulos3D::colorear_caras() {
     colores.resize(caras.size());
     srand((unsigned)time(NULL));
+    _vertex3f chess1(0, 1, 0);
+    _vertex3f chess2(0, 0, 1);
     switch (this->random_color_preset) {
+        case 3:
+            for (unsigned int i=0; i < colores.size(); i++) {
+                colores[i] = i % 2 == 0 ? chess1 : chess2;
+            }
+            break;
         case 2:
             // Gamma de colores grises
             for (unsigned int i = 0; i < colores.size(); i++)
@@ -110,7 +118,6 @@ void _triangulos3D::colorear_caras() {
                     1);
             }
             break;
-        case 0:
         default:
             // Aleatorio por defecto
             for (unsigned int i = 0; i < colores.size(); i++) {
@@ -145,8 +152,35 @@ void _triangulos3D::draw_solido_colores()
 // dibujar con distintos modos
 //*************************************************************************
 
+bool iluminacionActivada() {
+    return glIsEnabled(GL_LIGHTING) == GL_TRUE;
+}
+
+void activarLuces() {
+    if (!iluminacionActivada()) {
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+    }
+}
+
+void desactivarLuces() {
+    if (iluminacionActivada()) {
+        glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHT0);
+    }
+}
+
 void _triangulos3D::draw(_modo modo, float r, float g, float b, float grosor)
 {
+    // Si vamos a dibujar un modelo de iluminacion y esta esta desactivada, la activamos
+    if (!iluminacionActivada() && (modo == _modo::DIFUSSE_FLAT || modo == _modo::DIFUSSE_GOURAUD)) {
+        activarLuces();
+    }
+    // Si no dibujamos un modelo de iluminacion y esta activada, la desactivamos
+    else if (iluminacionActivada()) {
+        desactivarLuces();
+    }
+
     switch (modo)
     {
     case POINTS:
@@ -160,6 +194,14 @@ void _triangulos3D::draw(_modo modo, float r, float g, float b, float grosor)
         break;
     case SOLID_COLORS:
         draw_solido_colores();
+        break;
+    case DIFUSSE_FLAT:
+        draw_difuse_flat(_vertex3f(r,g,b));
+        break;
+    case DIFUSSE_GOURAUD:
+        // calcular_normales_caras();
+        // calcular_normales_vertices();
+        // draw_difuse_gouraud(_vertex3f(r,g,b), _vertex3f(5, 5, 5));
         break;
     }
 }
@@ -197,6 +239,7 @@ _cubo::_cubo(float tam)
     caras[11] = _vertex3i(6, 7, 4);
 
     colorear_caras();
+    calcular_normales_caras();
 }
 
 //*************************************************************************
@@ -223,6 +266,7 @@ _piramide::_piramide(float tam, float al)
 	caras[5]._0 = 3; caras[5]._1 = 2; caras[5]._2 = 1;
 
     colorear_caras();
+    calcular_normales_caras();
 }
 
 //*************************************************************************
@@ -253,6 +297,7 @@ _octaedro::_octaedro(float tam, float al)
     caras[7] = _vertex3i(0, 4, 3);
 
     colorear_caras();
+    calcular_normales_caras();
 }
 
 //*************************************************************************
@@ -285,6 +330,7 @@ void _objeto_ply::parametros(char *archivo) {
     }
 
     colorear_caras();
+    calcular_normales_caras();
 }
 
 //************************************************************************
@@ -441,7 +487,7 @@ void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num, bool tapa_inf
 
     // Finalmente asignamos un color a cada cara
     colorear_caras();
-
+    calcular_normales_caras();
 }
 
 _rotacion_ply::_rotacion_ply() {};
@@ -588,6 +634,7 @@ _extrusion::_extrusion(vector<_vertex3f> poligono, float x, float y, float z)
         c = c + 1;
     }
 
+    calcular_normales_caras();
     colorear_caras_aleatorio();
 }
 
@@ -900,4 +947,191 @@ void _avion::reset_model_values() {
     this->apertura_tren = -15;
     this->direccion_timon = 0;
     this->apertura_alerones = 0;
+}
+
+// *************************************************************
+// * PRACTICA 4
+// *************************************************************
+
+void _triangulos3D::calcular_normales_caras() {
+    normales_caras.resize(caras.size());
+    for (size_t i = 0; i < caras.size(); i++) {
+        _vertex3f a = vertices[caras[i]._1] - vertices[caras[i]._0];
+        _vertex3f b = vertices[caras[i]._2] - vertices[caras[i]._1];
+        normales_caras[i](a.y * b.z - a.z * b.y,
+                          a.z * b.x - a.x * b.z,
+                          a.x * b.y - a.y * b.x);
+        normales_caras[i] = normales_caras[i].normalize();
+    }
+}
+
+void _triangulos3D::calcular_normales_vertices()
+{
+    int i, n_c, n_v;
+    float modulo;
+
+    n_v = vertices.size();
+    normales_vertices.resize(n_v);
+
+    n_c = caras.size();
+
+    for (i = 0; i < n_v; i++)
+        normales_vertices[i] = _vertex3f(0.0, 0.0, 0.0);
+    
+    for (i = 0; i < n_c; i++)
+    {
+        normales_vertices[caras[i]._0] += normales_caras[i];
+        normales_vertices[caras[i]._1] += normales_caras[i];
+        normales_vertices[caras[i]._2] += normales_caras[i];
+    }
+
+    for (i = 0; i < n_v; i++)
+    {
+        normales_vertices[i].normalize();
+    }
+}
+
+void _triangulos3D::draw_difuse_flat(_vertex3f color) {
+
+    GLfloat material_diffuse[] = {0.1, 0.1, 0.1, 1.0};  // Color difuso
+    GLfloat material_specular[] = {0.7, 0.7, 0.7, 1.0}; // Color especular
+    GLfloat material_shininess[] = {1.0};              // Exponente de brillo
+
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, material_shininess);
+
+    glEnable(GL_NORMALIZE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glBegin(GL_TRIANGLES);
+    for (size_t i = 0; i < caras.size(); i++) {
+        // _vertex3f l = light_point - vertices[caras[i]._0];
+        // l = l.normalize();
+        // float escalar = l.x * normales_caras[i].x +
+        //                 l.y * normales_caras[i].y +
+        //                 l.z * normales_caras[i].z;
+        // if (escalar < 0.2) {
+        //     escalar = 0.2;
+        // }
+        glColor3f(colores[i].r, colores[i].g, colores[i].b);
+
+        glNormal3fv((GLfloat *)&normales_caras[i]);
+
+        glVertex3fv((GLfloat *)&vertices[caras[i]._0]);
+        glVertex3fv((GLfloat *)&vertices[caras[i]._1]);
+        glVertex3fv((GLfloat *)&vertices[caras[i]._2]);
+    }
+    glEnd();
+}
+
+float gauss(float ga, float gf)
+{
+    float sum;
+    int i;
+    sum = 0.0;
+    for (i = 0; i < 4; i++)
+        sum = sum + rand() % 32767;
+    return gf * sum / 4.0 - ga;
+}
+
+_montana::_montana(int nivelmax, float sigma, float h)
+{
+    if (nivelmax > 8)
+        nivelmax = 8;
+    int i, j, etapa;
+    float ga = sqrt(12.0);
+    float gf = 2 * ga / (32767 * 1.0);
+    int num = pow(2, nivelmax) + 1;
+    srand(time(NULL));
+
+    vertices.resize(num * num);
+
+    for (j = 0; j < num; j++) {
+        for (i = 0; i < num; i++) {
+            vertices[i + j * num].x = -0.1 * (num - 1) / 2.0 + i * 0.1;
+            vertices[i + j * num].z = -0.1 * (num - 1) / 2.0 + j * 0.1;
+            vertices[i + j * num].y = 0.0;
+        }
+    }
+
+    vertices[0].y = sigma * gauss(ga, gf);
+    vertices[num - 1].y = sigma * gauss(ga, gf);
+    vertices[num * (num - 1)].y = sigma * gauss(ga, gf);
+    vertices[num * num - 1].y = sigma * gauss(ga, gf);
+
+    int d1 = num - 1;
+    int d2 = (num - 1) / 2;
+
+    for (etapa = 0; etapa < nivelmax; etapa++)
+    {
+        sigma = sigma * pow(0.5, 0.5 * h);
+        for (j = d2; j < num - d2; j = j + d1) {
+            for (i = d2; i < num - d2; i = i + d1)
+            {
+                vertices[i + j * num].y = sigma * gauss(ga, gf) +
+                                          (vertices[i + d2 + (j + d2) * num].y + vertices[i + d2 + (j - d2) * num].y +
+                                           vertices[i - d2 + (j + d2) * num].y + vertices[i - d2 + (j - d2) * num].y) /
+                                              4.0;
+            }
+        }
+
+        sigma = sigma * pow(0.5, 0.5 * h);
+        for (i = d2; i < num - d2; i = i + d1)
+        {
+            vertices[i].y = sigma * gauss(ga, gf) + (vertices[i + d2].y +
+                                                        vertices[i - d2].y + vertices[i + d2 * num].y) /
+                                                        3.0;
+            vertices[i + num * (num - 1)].y = sigma * gauss(ga, gf) +
+                                                (vertices[i + d2 + num * (num - 1)].y +
+                                                vertices[i - d2 + num * (num - 1)].y +
+                                                vertices[i + (num - 1 - d2) * num].y) /
+                                                    3.0;
+            vertices[i * num].y = sigma * gauss(ga, gf) + (vertices[(i + d2) * num].y +
+                                                            vertices[(i - d2) * num].y + vertices[d2 + i * num].y) /
+                                                                3.0;
+            vertices[num - 1 + i * num].y = sigma * gauss(ga, gf) +
+                                            (vertices[num - 1 + (i + d2) * num].y +
+                                                vertices[num - 1 + (i - d2) * num].y +
+                                                vertices[num - 1 - d2 + i * num].y) /
+                                                3;
+        }
+
+        for (j = d2; j < num - d2; j = j + d1)
+            for (i = d1; i < num - d2; i = i + d1)
+                vertices[i + j * num].y = sigma * gauss(ga, gf) +
+                                            (vertices[i + (j + d2) * num].y + vertices[i + (j - d2) * num].y +
+                                            vertices[i + d2 + j * num].y + vertices[i - d2 + j * num].y) /
+                                                4.0;
+        for (j = d1; j < num - d2; j = j + d1)
+            for (i = d2; i < num - d2; i = i + d1)
+                vertices[i + j * num].y = sigma * gauss(ga, gf) +
+                                            (vertices[i + (j + d2) * num].y + vertices[i + (j - d2) * num].y +
+                                            vertices[i + d2 + j * num].y + vertices[i - d2 + j * num].y) /
+                                                4.0;
+
+        d1 = (int)d1 / 2;
+        d2 = (int)d2 / 2;
+    }
+
+    // caras
+    caras.resize((num - 1) * (num - 1) * 2);
+    int c = 0;
+    for (j = 0; j < num - 1; j++)
+        for (i = 0; i < num - 1; i++)
+        {
+            caras[c]._0 = i + j * num;
+            caras[c]._1 = i + 1 + j * num;
+            caras[c]._2 = i + 1 + (j + 1) * num;
+            c = c + 1;
+            caras[c]._0 = i + j * num;
+            caras[c]._1 = i + 1 + (j + 1) * num;
+            caras[c]._2 = i + (j + 1) * num;
+            c = c + 1;
+        }
+
+    // normales
+    ////colorear_caras();
+
+    calcular_normales_caras();
+    calcular_normales_vertices();
 }
