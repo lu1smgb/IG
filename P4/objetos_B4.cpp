@@ -392,31 +392,34 @@ void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num, bool tapa_inf
     }
 
     // ***** Caras longitudinales *****
+    size_t v0, v1, v2;
     // Generación de las caras longitudinales
     // Cada iteración de este bucle genera todas las caras de una sección del polígono
-    for (unsigned i = 0; i < num; i++) {
+    for (unsigned i = 0; i < num; i++)
+    {
         // Cada iteracion de este bucle genera las caras en una sección del perfil
-        for (unsigned j = 0; j < tam_perfil - 1; j++) {
+        for (unsigned j = 0; j < tam_perfil - 1; j++)
+        {
             /**
              * Cara de indice par (cara superior):
              * x = superior der
              * y = superior izq % V
              * z = inferior izq % V
-            */
-            caras.push_back(_vertex3i(
-                tam_perfil * i + j, 
-               (tam_perfil * (i + 1) + j)       % num_vertices, 
-               (tam_perfil * (i + 1) + (j + 1)) % num_vertices));
+             */
+            v0 = tam_perfil * i + j;
+            v1 = (tam_perfil * (i + 1) + j) % num_vertices;
+            v2 = (tam_perfil * (i + 1) + (j + 1)) % num_vertices;
+            caras.push_back(_vertex3i(v0, v2, v1));
             /**
              * Cara de indice impar (inferior):
              * x = inferior izq % V = z(superior)
              * y = inferior der
              * z = superior der = x(superior)
-            */
-            caras.push_back(_vertex3i(
-               (tam_perfil * (i + 1) + (j + 1)) % num_vertices,
-                tam_perfil * i + j,
-                tam_perfil * i + j + 1));
+             */
+            v0 = (tam_perfil * (i + 1) + (j + 1)) % num_vertices;
+            v1 = tam_perfil * i + j;
+            v2 = tam_perfil * i + j + 1;
+            caras.push_back(_vertex3i(v0, v1, v2));
         }
     }
 
@@ -461,11 +464,10 @@ void _rotacion::parametros(vector<_vertex3f> perfil, unsigned num, bool tapa_inf
              * z = superior izq (0)
              */
             if (tapa_superior) {
-                _vertex3i cara_superior(
-                    num_vertices,
-                    (tam_perfil * (i + 1)) % num_vertices,
-                    tam_perfil * i);
-                caras.push_back(cara_superior);
+                v0 = num_vertices;
+                v1 = (tam_perfil * (i + 1)) % num_vertices;
+                v2 = tam_perfil * i;
+                caras.push_back(_vertex3i(v0, v2, v1));
             }
 
             /**
