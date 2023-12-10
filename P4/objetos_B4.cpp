@@ -31,6 +31,26 @@ void _puntos3D::draw_puntos(float r, float g, float b, int grosor)
 // _triangulos3D
 //*************************************************************************
 
+_material::_material() {
+    ambiente[0] = ambiente[1] = ambiente[2] = 0.2;
+    difuso[0] = difuso[1] = difuso[2] = 0.5;
+    especular[0] = especular[1] = especular[2] = 0.9;
+    this->brillo = 8;
+}
+
+_material::_material(float a1, float a2, float a3, float d1, float d2, float d3, float e1, float e2, float e3, float brillo) {
+    ambiente[0] = a1;
+    ambiente[1] = a2;
+    ambiente[2] = a3;
+    difuso[0] = d1;
+    difuso[1] = d2;
+    difuso[2] = d3;
+    especular[0] = e1;
+    especular[1] = e2;
+    especular[2] = e3;
+    this->brillo = brillo;
+}
+
 _triangulos3D::_triangulos3D()
 {
     random_color_preset = 3;
@@ -974,7 +994,6 @@ void _triangulos3D::calcular_normales_caras() {
 void _triangulos3D::calcular_normales_vertices()
 {
     int i, n_c, n_v;
-    float modulo;
 
     n_v = vertices.size();
     normales_vertices.resize(n_v);
@@ -997,21 +1016,25 @@ void _triangulos3D::calcular_normales_vertices()
     }
 }
 
-void _triangulos3D::draw_difuse_flat(_vertex3f color) {
-
-    GLfloat material_ambient[] = {color.r * 1, color.g * 1, color.b * 1, 1.0}; // Color difuso
-    GLfloat material_diffuse[] = {color.r * 1, color.g * 1, color.b * 1, 1.0};  // Color difuso
-    GLfloat material_specular[] = {0.9, 0.9, 0.9, 1.0};                         // Color especular
-    GLfloat material_shininess[] = {8.0};                                       // Exponente de brillo
+void _triangulos3D::apply_material() {
+    GLfloat material_ambient[] = {material.ambiente[0], material.ambiente[1], material.ambiente[2], 1.0}; // Color difuso
+    GLfloat material_diffuse[] = {material.difuso[0], material.difuso[1], material.difuso[2], 1.0}; // Color difuso
+    GLfloat material_specular[] = {material.especular[0], material.especular[1], material.especular[2], 1.0};                        // Color especular
+    GLfloat material_shininess[] = {material.brillo};                                      // Exponente de brillo
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, material_ambient);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
     glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, material_shininess);
+}
+
+void _triangulos3D::draw_difuse_flat(_vertex3f color) {
+
+    apply_material();
 
     glShadeModel(GL_FLAT);
     glEnable(GL_NORMALIZE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT, GL_FILL);
     glBegin(GL_TRIANGLES);
     for (size_t i = 0; i < caras.size(); i++) {
         // _vertex3f l = light_point - vertices[caras[i]._0];
@@ -1022,7 +1045,7 @@ void _triangulos3D::draw_difuse_flat(_vertex3f color) {
         // if (escalar < 0.2) {
         //     escalar = 0.2;
         // }
-        glColor3f(colores[i].r, colores[i].g, colores[i].b);
+        //glColor3f(colores[i].r, colores[i].g, colores[i].b);
 
         glNormal3fv((GLfloat *)&normales_caras[i]);
 
@@ -1035,19 +1058,11 @@ void _triangulos3D::draw_difuse_flat(_vertex3f color) {
 
 void _triangulos3D::draw_difuse_gouraud(_vertex3f color) {
 
-    GLfloat material_ambient[] = {color.r * 1, color.g * 1, color.b * 1, 1.0};  // Color difuso
-    GLfloat material_diffuse[] = {color.r * 1, color.g * 1, color.b * 1, 1.0};  // Color difuso
-    GLfloat material_specular[] = {0.9, 0.9, 0.9, 1.0}; // Color especular
-    GLfloat material_shininess[] = {8.0};                                       // Exponente de brillo
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT, material_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, material_shininess);
+    apply_material();
 
     glShadeModel(GL_SMOOTH);
     glEnable(GL_NORMALIZE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT, GL_FILL);
     glBegin(GL_TRIANGLES);
     for (size_t i = 0; i < caras.size(); i++)
     {
@@ -1059,7 +1074,7 @@ void _triangulos3D::draw_difuse_gouraud(_vertex3f color) {
         // if (escalar < 0.2) {
         //     escalar = 0.2;
         // }
-        glColor3f(colores[i].r, colores[i].g, colores[i].b);
+        //glColor3f(colores[i].r, colores[i].g, colores[i].b);
         glNormal3fv((GLfloat *)&normales_vertices[caras[i]._0]);
         glVertex3fv((GLfloat *)&vertices[caras[i]._0]);
         glNormal3fv((GLfloat *)&normales_vertices[caras[i]._1]);

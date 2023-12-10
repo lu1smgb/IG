@@ -37,6 +37,15 @@ public:
 // clase triángulo
 //*************************************************************************
 
+struct _material {
+    GLfloat ambiente[3];
+    GLfloat difuso[3];
+    GLfloat especular[3];
+    float brillo;
+    _material();
+    _material(float a1, float a2, float a3, float d1, float d2, float d3, float e1, float e2, float e3, float brillo);
+};
+
 class _triangulos3D : public _puntos3D
 {
 protected:
@@ -46,6 +55,7 @@ protected:
     void colorear_caras();
     void calcular_normales_caras();
     void calcular_normales_vertices();
+    void apply_material();
 public:
     _triangulos3D();
     void draw_aristas(float r, float g, float b, int grosor);
@@ -60,6 +70,8 @@ public:
     vector<_vertex3f> colores;
     vector<_vertex3f> normales_caras;
     vector<_vertex3f> normales_vertices;
+
+    _material material;
 };
 
 bool iluminacionActivada();

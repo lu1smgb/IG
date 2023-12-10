@@ -145,9 +145,28 @@ void draw_axis()
 
 void posicionar_luz0()
 {
-	const GLfloat luz_posicion[] = {5.0, 5.0, 5.0, 0.0};
+	const GLfloat luz_posicion[] = {1.0, 1.0, 1.0, 1.0};
 
-	glLightfv(GL_LIGHT0, GL_POSITION, luz_posicion);
+	glPushMatrix();
+		glTranslatef(100, 100, 100);
+		// glRotatef(45, 0, 1, 0);
+		glLightfv(GL_LIGHT0, GL_POSITION, luz_posicion);
+	glPopMatrix();
+}
+
+void setup_iluminacion()
+{
+	desactivarLuces();
+
+	const GLfloat luz_ambiente[] = {0.3, 0.3, 0.3, 1.0};
+	const GLfloat luz_difusa[] = {1.0, 1.0, 1.0, 1.0};
+	const GLfloat luz_especular[] = {1.0, 1.0, 1.0, 1.0};
+	const GLfloat luz_focus[] = {0.0, 0.0, 0.0};
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, luz_focus);
 }
 
 //**************************************************************************
@@ -394,21 +413,6 @@ void draw(void)
 	posicionar_luz0();
 	draw_objects();
 	glutSwapBuffers();
-}
-
-void setup_iluminacion() {
-
-	desactivarLuces();
-
-	const GLfloat luz_ambiente[] = {0.1, 0.1, 0.1, 1.0};
-	const GLfloat luz_difusa[] = {0.6, 0.6, 0.6, 1.0};
-	const GLfloat luz_especular[] = {1, 1, 1, 1.0};
-	const GLfloat luz_focus[] = {0.0, 0.0, 0.0};
-
-	glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
-	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, luz_focus);
 }
 
 //***************************************************************************
@@ -764,6 +768,12 @@ int main(int argc, char *argv[])
 
 	// creación del objeto ply
 	ply.parametros(argv[1]);
+
+	_material mate(0, 0.1, 0.2, 0, 0.4, 0.8, 0, 0, 0, 0);
+	_material satinado(0, 0.7, 1, 0, 0.7, 1, 0.5, 0.5, 0.5, 10);
+	_material brillante(0.3, 0.6, 1, 0.3, 0.6, 1, 1, 1, 1, 50);
+
+	ply.material = mate;
 
 	rotacion_ply.parametros("peon.perfil", 10);
 
