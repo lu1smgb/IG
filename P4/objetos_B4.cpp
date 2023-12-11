@@ -180,45 +180,43 @@ void activarLuces() {
     if (!iluminacionActivada()) {
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
+        glEnable(GL_LIGHT1);
     }
 }
 
 void desactivarLuces() {
     if (iluminacionActivada()) {
         glDisable(GL_LIGHTING);
-        glDisable(GL_LIGHT0);
     }
 }
 
 void _triangulos3D::draw(_modo modo, float r, float g, float b, float grosor)
 {
-    // Si vamos a dibujar un modelo de iluminacion y esta esta desactivada, la activamos
-    if (!iluminacionActivada() && (modo == _modo::DIFUSSE_FLAT || modo == _modo::DIFUSSE_GOURAUD)) {
-        activarLuces();
-    }
-    // Si no dibujamos un modelo de iluminacion y esta activada, la desactivamos
-    else if (iluminacionActivada()) {
-        desactivarLuces();
-    }
 
     switch (modo)
     {
     case POINTS:
+        desactivarLuces();
         draw_puntos(r, g, b, grosor);
         break;
     case EDGES:
+        desactivarLuces();
         draw_aristas(r, g, b, grosor);
         break;
     case SOLID:
+        desactivarLuces();
         draw_solido(r, g, b);
         break;
     case SOLID_COLORS:
+        desactivarLuces();
         draw_solido_colores();
         break;
     case DIFUSSE_FLAT:
+        activarLuces();
         draw_difuse_flat(_vertex3f(r,g,b));
         break;
     case DIFUSSE_GOURAUD:
+        activarLuces();
         draw_difuse_gouraud(_vertex3f(r,g,b));
         break;
     }
@@ -659,7 +657,7 @@ _extrusion::_extrusion(vector<_vertex3f> poligono, float x, float y, float z)
         c = c + 1;
     }
 
-    colorear_caras_aleatorio();
+    colorear_caras();
     calcular_normales_caras();
     calcular_normales_vertices();
 }

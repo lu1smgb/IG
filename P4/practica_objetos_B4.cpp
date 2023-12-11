@@ -71,6 +71,9 @@ paso_animacion paso = INICIO;
 bool reproducir_animacion = false;
 bool dibujar_ejes = true;
 
+bool dibujar_direccional = true;
+int angulo_luz_direccional = 0;
+
 //**************************************************************************
 //
 //***************************************************************************
@@ -121,9 +124,8 @@ void draw_axis()
 	 * grosor de las líneas, si no, los ejes tendrán un grosor igual
 	 * al de las aristas
 	 */
-	glLineWidth(1);
 
-	glDisable(GL_LIGHTING);
+	desactivarLuces();
 	glLineWidth(2);
 	if (dibujar_ejes) {
 		glBegin(GL_LINES);
@@ -141,16 +143,28 @@ void draw_axis()
 		glVertex3f(0, 0, AXIS_SIZE);
 		glEnd();
 	}
+	
 }
 
 void posicionar_luz0()
 {
+	// El ultimo valor indica si la luz es puntual (1) o direccional (0)
 	const GLfloat luz_posicion[] = {1.0, 1.0, 1.0, 1.0};
 
 	glPushMatrix();
 		glTranslatef(100, 100, 100);
-		// glRotatef(45, 0, 1, 0);
 		glLightfv(GL_LIGHT0, GL_POSITION, luz_posicion);
+	glPopMatrix();
+}
+
+void posicionar_luz1()
+{
+	const GLfloat luz_posicion[] = {1.0, 1.0, 1.0, 0.0};
+
+	glPushMatrix();
+		glRotatef(angulo_luz_direccional, 0, 1, 0);
+		glTranslatef(0, 0, 50);
+		glLightfv(GL_LIGHT1, GL_POSITION, luz_posicion);
 	glPopMatrix();
 }
 
@@ -158,15 +172,22 @@ void setup_iluminacion()
 {
 	desactivarLuces();
 
-	const GLfloat luz_ambiente[] = {0.3, 0.3, 0.3, 1.0};
-	const GLfloat luz_difusa[] = {1.0, 1.0, 1.0, 1.0};
-	const GLfloat luz_especular[] = {1.0, 1.0, 1.0, 1.0};
+	const GLfloat luz_ambiente1[] = {0.3, 0.3, 0.3, 1.0};
+	const GLfloat luz_difusa1[] = {1.0, 1.0, 1.0, 1.0};
+	const GLfloat luz_especular1[] = {1.0, 1.0, 1.0, 1.0};
+	const GLfloat luz_ambiente2[] = {0.2, 0, 0.1, 1.0};
+	const GLfloat luz_difusa2[] = {0.4, 0, 0.2, 1.0};
+	const GLfloat luz_especular2[] = {1, 0, 0.5, 1.0};
 	const GLfloat luz_focus[] = {0.0, 0.0, 0.0};
 
-	glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente1);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa1);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular1);
+	glLightfv(GL_LIGHT1, GL_AMBIENT, luz_ambiente2);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, luz_difusa2);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, luz_especular2);
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, luz_focus);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, luz_focus);
 }
 
 //**************************************************************************
@@ -411,6 +432,7 @@ void draw(void)
 	change_observer();
 	draw_axis();
 	posicionar_luz0();
+	posicionar_luz1();
 	draw_objects();
 	glutSwapBuffers();
 }
@@ -509,8 +531,37 @@ void normal_key(unsigned char Tecla1, int x, int y)
 	case 'M':
 		montana = _montana(3, 0.5, 3);
 		t_objeto = MONTANA;
+		break;
 	case '`':
 		dibujar_ejes = !dibujar_ejes;
+		break;
+	case 'J':
+		if (dibujar_direccional)
+			angulo_luz_direccional = (angulo_luz_direccional - 5) % 360;
+		break;
+	case 'K':
+		if (dibujar_direccional)
+			angulo_luz_direccional = (angulo_luz_direccional + 5) % 360;
+		break;
+	case 'I':
+		dibujar_direccional = !dibujar_direccional;
+		if (!dibujar_direccional) {
+			const GLfloat luz_ambiente[] = {0,0,0,1};
+			const GLfloat luz_difusa[] = {0,0,0,1};
+			const GLfloat luz_especular[] = {0,0,0,1};
+			glLightfv(GL_LIGHT1, GL_AMBIENT, luz_ambiente);
+			glLightfv(GL_LIGHT1, GL_DIFFUSE, luz_difusa);
+			glLightfv(GL_LIGHT1, GL_SPECULAR, luz_especular);
+		}
+		else {
+			const GLfloat luz_ambiente[] = {0.2, 0, 0.1, 1.0};
+			const GLfloat luz_difusa[] = {0.4, 0, 0.2, 1.0};
+			const GLfloat luz_especular[] = {1, 0, 0.5, 1.0};
+			glLightfv(GL_LIGHT1, GL_AMBIENT, luz_ambiente);
+			glLightfv(GL_LIGHT1, GL_DIFFUSE, luz_difusa);
+			glLightfv(GL_LIGHT1, GL_SPECULAR, luz_especular);
+		}
+		break;
 	}
 	glutPostRedisplay();
 }
@@ -634,6 +685,9 @@ void print_controls() {
 			  << "[X]\t->\tDibujar objeto por mediante perfil PLY\n"
 			  << "[A]\t->\tDibujar objeto jerarquico (avion)\n"
 			  << "[S]\t->\tIniciar/detener animacion (objeto jerarquico)\n"
+			  << "[J]\t->\tRotar luz direccional en sentido horario\n"
+			  << "[K]\t->\tRotar luz direccional en sentido antihorario\n"
+			  << "[I]\t->\tActivar/desactivar luz direccional\n"
 			  << "\t--- Controles del objeto jerarquico ---\n"
 			  << "[F1]\t->\tAbrir alerones\n"
 			  << "[F2]\t->\tCerrar alerones\n"
@@ -773,7 +827,7 @@ int main(int argc, char *argv[])
 	_material satinado(0, 0.7, 1, 0, 0.7, 1, 0.5, 0.5, 0.5, 10);
 	_material brillante(0.3, 0.6, 1, 0.3, 0.6, 1, 1, 1, 1, 50);
 
-	ply.material = mate;
+	ply.material = satinado;
 
 	rotacion_ply.parametros("peon.perfil", 10);
 
