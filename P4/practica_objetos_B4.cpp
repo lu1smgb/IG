@@ -175,9 +175,9 @@ void setup_iluminacion()
 	const GLfloat luz_ambiente1[] = {0.3, 0.3, 0.3, 1.0};
 	const GLfloat luz_difusa1[] = {1.0, 1.0, 1.0, 1.0};
 	const GLfloat luz_especular1[] = {1.0, 1.0, 1.0, 1.0};
-	const GLfloat luz_ambiente2[] = {0.2, 0, 0.1, 1.0};
-	const GLfloat luz_difusa2[] = {0.4, 0, 0.2, 1.0};
-	const GLfloat luz_especular2[] = {1, 0, 0.5, 1.0};
+	const GLfloat luz_ambiente2[] = {0.2, 0.1, 0.05, 1.0};
+	const GLfloat luz_difusa2[] = {0.4, 0.2, 0.1, 1.0};
+	const GLfloat luz_especular2[] = {0.8, 0.4, 0.2, 1.0};
 	const GLfloat luz_focus[] = {0.0, 0.0, 0.0};
 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente1);
@@ -554,9 +554,9 @@ void normal_key(unsigned char Tecla1, int x, int y)
 			glLightfv(GL_LIGHT1, GL_SPECULAR, luz_especular);
 		}
 		else {
-			const GLfloat luz_ambiente[] = {0.2, 0, 0.1, 1.0};
-			const GLfloat luz_difusa[] = {0.4, 0, 0.2, 1.0};
-			const GLfloat luz_especular[] = {1, 0, 0.5, 1.0};
+			const GLfloat luz_ambiente[] = {0.2, 0.1, 0.05, 1.0};
+			const GLfloat luz_difusa[] = {0.4, 0.2, 0.1, 1.0};
+			const GLfloat luz_especular[] = {0.8, 0.4, 0.2, 1.0};
 			glLightfv(GL_LIGHT1, GL_AMBIENT, luz_ambiente);
 			glLightfv(GL_LIGHT1, GL_DIFFUSE, luz_difusa);
 			glLightfv(GL_LIGHT1, GL_SPECULAR, luz_especular);
@@ -823,11 +823,16 @@ int main(int argc, char *argv[])
 	// creación del objeto ply
 	ply.parametros(argv[1]);
 
-	_material mate(0, 0.1, 0.2, 0, 0.4, 0.8, 0, 0, 0, 0);
-	_material satinado(0, 0.7, 1, 0, 0.7, 1, 0.5, 0.5, 0.5, 10);
-	_material brillante(0.3, 0.6, 1, 0.3, 0.6, 1, 1, 1, 1, 50);
-
-	ply.material = satinado;
+	cubo.material = &MATE_CYAN;
+	piramide.material = &MATE_CYAN;
+	cono.material = &SATINADO_CYAN;
+	cilindro.material = &SATINADO_CYAN;
+	esfera.material = &SATINADO_CYAN;
+	ply.material = &SATINADO_CYAN;
+	rotacion.material = &SATINADO_CYAN;
+	rotacion_ply.material = &BRILLANTE_CYAN;
+	extrusion->material = &SATINADO_CYAN;
+	montana.material = &SATINADO_CYAN;
 
 	rotacion_ply.parametros("peon.perfil", 10);
 

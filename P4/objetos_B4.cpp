@@ -54,6 +54,7 @@ _material::_material(float a1, float a2, float a3, float d1, float d2, float d3,
 _triangulos3D::_triangulos3D()
 {
     random_color_preset = 3;
+    material = nullptr;
 }
 
 //*************************************************************************
@@ -674,6 +675,7 @@ _ala::_ala(float longitud, float grosor, float anchura, float apertura_aleron)
     this->anchura = anchura;
     this->apertura_aleron = abs(apertura_aleron);
     this->cubo = _cubo();
+    this->cubo.material = &SATINADO_NEGRO;
     this->aleron = _aleron();
 }
 
@@ -708,13 +710,14 @@ void _ala::draw(_modo modo, float r, float g, float b, float grosor)
 }
 
 _aleron::_aleron() {
-
+    this->material = &MATE_CYAN;
 }
 
 void _aleron::draw(_modo modo, float r, float g, float b, float grosor)
 {
     glPushMatrix();
     glTranslatef(0, 0.5, -0.5);
+    this->cubo.material = this->material;
     cubo.draw(modo, r, g, b, grosor);
     glPopMatrix();
 }
@@ -725,6 +728,7 @@ _aspa::_aspa(float longitud, float grosor, float anchura, float inclinacion) {
     this->anchura = anchura;
     this->inclinacion = inclinacion;
     this->cubo = _cubo();
+    this->cubo.material = &SATINADO_CYAN;
 }
 
 void _aspa::draw(_modo modo, float r, float g, float b, float grosor)
@@ -746,6 +750,7 @@ _helice::_helice(float longitud, float grosor, float anchura, float inclinacion,
     this->num_helices = num_helices;
     this->longitud_brazo = longitud_brazo;
     this->eje = _cilindro(0.5, 1, 6);
+    this->eje.material = &BRILLANTE_CYAN;
     this->aspa = _aspa(this->longitud, this->grosor, this->anchura, this->inclinacion);
 }
 
@@ -790,6 +795,7 @@ void _tren_aterrizaje::draw(_modo modo, float r, float g, float b, float grosor)
     glPushMatrix();
     glTranslatef(0, -this->longitud_brazo / 2, 0);
     glScalef(0.25, this->longitud_brazo, 0.25);
+    this->cilindro.material = &SATINADO_NEGRO;
     cilindro.draw(modo, 0.3, 0.3, 0.3, grosor);
     glPopMatrix();
 
@@ -797,6 +803,7 @@ void _tren_aterrizaje::draw(_modo modo, float r, float g, float b, float grosor)
     glTranslatef(0, -this->longitud_brazo, 0);
     glRotatef(90, 0, 0, 1);
     glScalef(radio_rueda, 0.5, radio_rueda);
+    this->cilindro.material = &MATE_NEGRO;
     cilindro.draw(modo, 0.2, 0.2, 0.2, grosor);
     glPopMatrix();
 
@@ -807,7 +814,9 @@ _fuselaje::_fuselaje(float anchura, float altura, float longitud) {
     this->altura = altura;
     this->longitud = longitud;
     this->cubo = _cubo();
+    this->cubo.material = &MATE_NEGRO;
     this->retrovisor = _aleron();
+    this->retrovisor.material = &BRILLANTE_CYAN;
 }
 
 void _fuselaje::draw(_modo modo, float r, float g, float b, float grosor) {
@@ -841,6 +850,7 @@ _timon::_timon(float grosor, float altura, float longitud) {
     this->altura = altura;
     this->longitud = longitud;
     this->cubo = _cubo();
+    this->cubo.material = &MATE_CYAN;
 }
 
 void _timon::draw(_modo modo, float r, float g, float b, float grosor) {
@@ -1015,10 +1025,10 @@ void _triangulos3D::calcular_normales_vertices()
 }
 
 void _triangulos3D::apply_material() {
-    GLfloat material_ambient[] = {material.ambiente[0], material.ambiente[1], material.ambiente[2], 1.0}; // Color difuso
-    GLfloat material_diffuse[] = {material.difuso[0], material.difuso[1], material.difuso[2], 1.0}; // Color difuso
-    GLfloat material_specular[] = {material.especular[0], material.especular[1], material.especular[2], 1.0};                        // Color especular
-    GLfloat material_shininess[] = {material.brillo};                                      // Exponente de brillo
+    GLfloat material_ambient[] = {material->ambiente[0], material->ambiente[1], material->ambiente[2], 1.0};     // Color difuso
+    GLfloat material_diffuse[] = {material->difuso[0], material->difuso[1], material->difuso[2], 1.0};           // Color difuso
+    GLfloat material_specular[] = {material->especular[0], material->especular[1], material->especular[2], 1.0}; // Color especular
+    GLfloat material_shininess[] = {material->brillo};                                                           // Exponente de brillo
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, material_ambient);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
@@ -1028,30 +1038,34 @@ void _triangulos3D::apply_material() {
 
 void _triangulos3D::draw_difuse_flat(_vertex3f color) {
 
-    apply_material();
+    if (material != nullptr) {
+        apply_material();
 
-    glShadeModel(GL_FLAT);
-    glEnable(GL_NORMALIZE);
-    glPolygonMode(GL_FRONT, GL_FILL);
-    glBegin(GL_TRIANGLES);
-    for (size_t i = 0; i < caras.size(); i++) {
-        // _vertex3f l = light_point - vertices[caras[i]._0];
-        // l = l.normalize();
-        // float escalar = l.x * normales_caras[i].x +
-        //                 l.y * normales_caras[i].y +
-        //                 l.z * normales_caras[i].z;
-        // if (escalar < 0.2) {
-        //     escalar = 0.2;
-        // }
-        //glColor3f(colores[i].r, colores[i].g, colores[i].b);
+        glShadeModel(GL_FLAT);
+        glEnable(GL_NORMALIZE);
+        glPolygonMode(GL_FRONT, GL_FILL);
+        glBegin(GL_TRIANGLES);
+        for (size_t i = 0; i < caras.size(); i++)
+        {
+            // _vertex3f l = light_point - vertices[caras[i]._0];
+            // l = l.normalize();
+            // float escalar = l.x * normales_caras[i].x +
+            //                 l.y * normales_caras[i].y +
+            //                 l.z * normales_caras[i].z;
+            // if (escalar < 0.2) {
+            //     escalar = 0.2;
+            // }
+            // glColor3f(colores[i].r, colores[i].g, colores[i].b);
 
-        glNormal3fv((GLfloat *)&normales_caras[i]);
+            glNormal3fv((GLfloat *)&normales_caras[i]);
 
-        glVertex3fv((GLfloat *)&vertices[caras[i]._0]);
-        glVertex3fv((GLfloat *)&vertices[caras[i]._1]);
-        glVertex3fv((GLfloat *)&vertices[caras[i]._2]);
+            glVertex3fv((GLfloat *)&vertices[caras[i]._0]);
+            glVertex3fv((GLfloat *)&vertices[caras[i]._1]);
+            glVertex3fv((GLfloat *)&vertices[caras[i]._2]);
+        }
+        glEnd();
     }
-    glEnd();
+
 }
 
 void _triangulos3D::draw_difuse_gouraud(_vertex3f color) {

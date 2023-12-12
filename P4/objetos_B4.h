@@ -46,6 +46,13 @@ struct _material {
     _material(float a1, float a2, float a3, float d1, float d2, float d3, float e1, float e2, float e3, float brillo);
 };
 
+const _material TEST = _material(0.2, 0.2, 0.2, 0.8, 0.8, 0.8, 1, 1, 1, 50);
+const _material MATE_CYAN = _material(0, 0.1, 0.2, 0, 0.4, 0.8, 0, 0, 0, 0);
+const _material MATE_NEGRO = _material(0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0, 0, 0, 0);
+const _material SATINADO_CYAN = _material(0, 0.7, 1, 0, 0.7, 1, 0.5, 0.5, 0.5, 10);
+const _material SATINADO_NEGRO = _material(0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 10);
+const _material BRILLANTE_CYAN = _material(0.3, 0.6, 1, 0.3, 0.6, 1, 1, 1, 1, 50);
+
 class _triangulos3D : public _puntos3D
 {
 protected:
@@ -71,7 +78,7 @@ public:
     vector<_vertex3f> normales_caras;
     vector<_vertex3f> normales_vertices;
 
-    _material material;
+    const _material *material;
 };
 
 bool iluminacionActivada();
