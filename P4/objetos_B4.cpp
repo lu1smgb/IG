@@ -193,7 +193,6 @@ void desactivarLuces() {
 
 void _triangulos3D::draw(_modo modo, float r, float g, float b, float grosor)
 {
-
     switch (modo)
     {
     case POINTS:
@@ -266,6 +265,8 @@ _cubo::_cubo(float tam)
 
 _piramide::_piramide(float tam, float al)
 {
+    this->tam = tam;
+    this->al = al;
 
 	// vertices
 	vertices.resize(5);
@@ -1206,4 +1207,101 @@ _montana::_montana(int nivelmax, float sigma, float h)
     calcular_normales_caras();
     calcular_normales_vertices();
     colorear_caras();
+}
+
+_textura::_textura() {
+    this->id = 0;
+    this->image = vector<unsigned char>();
+}
+
+_textura::_textura(string path, unsigned int id) {
+    cout << "Creando textura" << "\n";
+
+    this->id = id;
+
+    cimg_library::CImg<unsigned char> read_image;
+    read_image.load(path.c_str());
+
+    int width = read_image.width();
+    int height = read_image.height();
+    cout << "Dimensiones de la imagen: " << width << "x" << height << "\n";
+    for (unsigned long i = 0; i < height; i++) {
+        for (unsigned long j = 0; j < width; j++) {
+            unsigned char *r = read_image.data(j, i, 0, 0);
+            unsigned char *g = read_image.data(j, i, 0, 1);
+            unsigned char *b = read_image.data(j, i, 0, 2);
+            // cout << "---- Pixel " << j << "x" << i << " ----\n";
+            // cout << "R: " << (unsigned int)*r << "\n";
+            // cout << "G: " << (unsigned int)*g << "\n";
+            // cout << "B: " << (unsigned int)*b << "\n";
+            // cout << "---------------------------------------\n";
+            this->image.push_back(*r);
+            this->image.push_back(*g);
+            this->image.push_back(*b);
+        }
+    }
+
+    glGenTextures(1, &this->id);
+    glBindTexture(GL_TEXTURE_2D, this->id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
+                 0, GL_RGB, GL_UNSIGNED_BYTE, &read_image[0]);
+
+    cout << "Fin de creacion de textura" << "\n";
+}
+
+_textura::~_textura() {
+    glDeleteTextures(1, &this->id);
+    image.clear();
+}
+
+void _cubo::draw_textura() {
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, this->textura.id);
+    glBegin(GL_QUADS);
+    for (unsigned short i = 0; i < caras.size(); i++) {
+        if (i == 0) {
+            glTexCoord2f(1, 0);
+            glVertex3fv((GLfloat *)&vertices[4 * i + 1]);
+            glTexCoord2f(0, 0);
+            glVertex3fv((GLfloat *)&vertices[4 * i]);
+            glTexCoord2f(0, 1);
+            glVertex3fv((GLfloat *)&vertices[4 * i + 3]);
+            glTexCoord2f(1, 1);
+            glVertex3fv((GLfloat *)&vertices[4 * i + 2]);
+        }
+        else if (i == 1) {
+            glTexCoord2f(0, 0);
+            glVertex3fv((GLfloat *)&vertices[4 * i]);
+            glTexCoord2f(1, 0);
+            glVertex3fv((GLfloat *)&vertices[4 * i + 1]);
+            glTexCoord2f(1, 1);
+            glVertex3fv((GLfloat *)&vertices[4 * i + 2]);
+            glTexCoord2f(0, 1);
+            glVertex3fv((GLfloat *)&vertices[4 * i + 3]);
+        }
+        else {
+            _vertex4ui idx;
+            idx.z = (i - 2) % 4;
+            idx.w = (i - 1) % 4;
+            idx.x = 4 + ((i - 1) % 4);
+            idx.y = 4 + ((i - 2) % 4);
+            glTexCoord2f(0, 0);
+            glVertex3fv((GLfloat *)&vertices[idx.x]);
+            glTexCoord2f(1, 0);
+            glVertex3fv((GLfloat *)&vertices[idx.y]);
+            glTexCoord2f(1, 1);
+            glVertex3fv((GLfloat *)&vertices[idx.z]);
+            glTexCoord2f(0, 1);
+            glVertex3fv((GLfloat *)&vertices[idx.w]);
+        }
+    }
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+
 }

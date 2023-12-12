@@ -23,7 +23,8 @@ typedef enum
 	ROTACION_PLY,
 	EXTRUSION,
 	JERARQUICO,
-	MONTANA
+	MONTANA,
+	SIMPLE_TEXTURA
 } _tipo_objeto;
 _tipo_objeto t_objeto = CUBO;
 _modo modo = SOLID;
@@ -52,6 +53,7 @@ _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
 _montana montana(5, 2, 5);
+_cubo obj_tex;
 
 typedef enum
 {
@@ -377,7 +379,6 @@ static void animate()
 
 void draw_objects()
 {
-
 	// Si se va a cambiar de objeto cuando se este reproduciendo la animacion
 	// entonces se detendra automaticamente
 	if (t_objeto != JERARQUICO && reproducir_animacion) {
@@ -418,6 +419,9 @@ void draw_objects()
 		break;
 	case MONTANA:
 		montana.draw(modo, 0.7, 0.7, 0.7, 5);
+		break;
+	case SIMPLE_TEXTURA:
+		obj_tex.draw_textura();
 		break;
 	}
 }
@@ -488,6 +492,10 @@ void normal_key(unsigned char Tecla1, int x, int y)
 		break;
 	case '6':
 		modo = DIFUSSE_GOURAUD;
+		break;
+	case '7':
+		modo = TEXTURA;
+		t_objeto = SIMPLE_TEXTURA;
 		break;
 	case 'P':
 		t_objeto = PIRAMIDE;
@@ -833,6 +841,9 @@ int main(int argc, char *argv[])
 	rotacion_ply.material = &BRILLANTE_CYAN;
 	extrusion->material = &SATINADO_CYAN;
 	montana.material = &SATINADO_CYAN;
+
+	const _textura saul_goodman("./img/abeto.jpg", 1U);
+	obj_tex.textura = saul_goodman;
 
 	rotacion_ply.parametros("peon.perfil", 10);
 

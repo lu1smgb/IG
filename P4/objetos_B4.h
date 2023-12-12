@@ -6,6 +6,7 @@
 #include <GL/gl.h>
 #include "vertex.h"
 #include <stdlib.h>
+#include "CImg.h"
 
 const float AXIS_SIZE = 5000;
 const float _0 = 1e-5;
@@ -16,7 +17,8 @@ typedef enum
     SOLID,
     SOLID_COLORS,
     DIFUSSE_FLAT,
-    DIFUSSE_GOURAUD
+    DIFUSSE_GOURAUD,
+    TEXTURA
 } _modo;
 
 //*************************************************************************
@@ -53,6 +55,14 @@ const _material SATINADO_CYAN = _material(0, 0.7, 1, 0, 0.7, 1, 0.5, 0.5, 0.5, 1
 const _material SATINADO_NEGRO = _material(0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 10);
 const _material BRILLANTE_CYAN = _material(0.3, 0.6, 1, 0.3, 0.6, 1, 1, 1, 1, 50);
 
+struct _textura {
+    unsigned int id;
+    vector<unsigned char> image;
+    _textura();
+    _textura(string path, unsigned int id);
+    ~_textura();
+};
+
 class _triangulos3D : public _puntos3D
 {
 protected:
@@ -72,7 +82,6 @@ public:
 
     void draw_difuse_flat(_vertex3f color);
     void draw_difuse_gouraud(_vertex3f color);
-
     vector<_vertex3i> caras;
     vector<_vertex3f> colores;
     vector<_vertex3f> normales_caras;
@@ -92,7 +101,9 @@ void desactivarLuces();
 class _cubo : public _triangulos3D
 {
 public:
+    _textura textura;
     _cubo(float tam = 0.5);
+    void draw_textura();
 };
 
 //*************************************************************************
@@ -101,8 +112,12 @@ public:
 
 class _piramide : public _triangulos3D
 {
+private:
+    float tam, al;
 public:
+    _textura textura;
     _piramide(float tam = 0.5, float al = 1.0);
+    void draw_textura();
 };
 
 //*************************************************************************
@@ -290,10 +305,6 @@ protected:
     _helice helice;
     _timon timon;
 };
-
-// *************************************************************
-// * PRACTICA 4
-// *************************************************************
 
 class _montana : public _triangulos3D
 {
