@@ -5,8 +5,8 @@ EJECUTABLE= practica_objetos_B4.out
 MODULOS:= practica_objetos_B4.o\
          objetos_B4.o\
          file_ply_stl.o\
-      
-LIBS:= -lglut -lGLU -lGL -lsupc++ -lm -lc -lstdc++ -lpthread -L/usr/lib/nvidia-331
+		
+LIBS:= -lglut -lGLU -lGL -lsupc++ -lm -lc -lstdc++ -lpthread -L/usr/lib/nvidia-331 -L/usr/X11R6/lib/ -lX11
 CPPFLAGS:= -Wall -fmax-errors=2 -g
 
 CC= g++
