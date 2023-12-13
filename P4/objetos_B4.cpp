@@ -618,6 +618,7 @@ _esfera::_esfera(float radio, unsigned num_x, unsigned num_y, bool tapa_inferior
         perfil.push_back(_vertex3f(x, y, 0));
     }
     parametros(perfil, num_x, tapa_inferior, tapa_superior);
+    calcular_normales_vertices_esfera();
 };
 
 //************************************************************************
@@ -1025,8 +1026,7 @@ void _triangulos3D::calcular_normales_vertices()
     }
 }
 
-void _esfera::calcular_normales_vertices() {
-    cout << "eyeyey" << "\n";
+void _esfera::calcular_normales_vertices_esfera() {
     int num_vertices = this->vertices.size();
     this->normales_vertices.resize(num_vertices);
     for (unsigned short i=0; i < num_vertices; i++) {
@@ -1106,117 +1106,6 @@ void _triangulos3D::draw_difuse_gouraud(_vertex3f color) {
         glVertex3fv((GLfloat *)&vertices[caras[i]._2]);
     }
     glEnd();
-}
-
-float gauss(float ga, float gf)
-{
-    float sum;
-    int i;
-    sum = 0.0;
-    for (i = 0; i < 4; i++)
-        sum = sum + rand() % 32767;
-    return gf * sum / 4.0 - ga;
-}
-
-_montana::_montana(int nivelmax, float sigma, float h)
-{
-    if (nivelmax > 8)
-        nivelmax = 8;
-    int i, j, etapa;
-    float ga = sqrt(12.0);
-    float gf = 2 * ga / (32767 * 1.0);
-    int num = pow(2, nivelmax) + 1;
-    srand(time(NULL));
-
-    vertices.resize(num * num);
-
-    for (j = 0; j < num; j++) {
-        for (i = 0; i < num; i++) {
-            vertices[i + j * num].x = -0.1 * (num - 1) / 2.0 + i * 0.1;
-            vertices[i + j * num].z = -0.1 * (num - 1) / 2.0 + j * 0.1;
-            vertices[i + j * num].y = 0.0;
-        }
-    }
-
-    vertices[0].y = sigma * gauss(ga, gf);
-    vertices[num - 1].y = sigma * gauss(ga, gf);
-    vertices[num * (num - 1)].y = sigma * gauss(ga, gf);
-    vertices[num * num - 1].y = sigma * gauss(ga, gf);
-
-    int d1 = num - 1;
-    int d2 = (num - 1) / 2;
-
-    for (etapa = 0; etapa < nivelmax; etapa++)
-    {
-        sigma = sigma * pow(0.5, 0.5 * h);
-        for (j = d2; j < num - d2; j = j + d1) {
-            for (i = d2; i < num - d2; i = i + d1)
-            {
-                vertices[i + j * num].y = sigma * gauss(ga, gf) +
-                                          (vertices[i + d2 + (j + d2) * num].y + vertices[i + d2 + (j - d2) * num].y +
-                                           vertices[i - d2 + (j + d2) * num].y + vertices[i - d2 + (j - d2) * num].y) /
-                                              4.0;
-            }
-        }
-
-        sigma = sigma * pow(0.5, 0.5 * h);
-        for (i = d2; i < num - d2; i = i + d1)
-        {
-            vertices[i].y = sigma * gauss(ga, gf) + (vertices[i + d2].y +
-                                                        vertices[i - d2].y + vertices[i + d2 * num].y) /
-                                                        3.0;
-            vertices[i + num * (num - 1)].y = sigma * gauss(ga, gf) +
-                                                (vertices[i + d2 + num * (num - 1)].y +
-                                                vertices[i - d2 + num * (num - 1)].y +
-                                                vertices[i + (num - 1 - d2) * num].y) /
-                                                    3.0;
-            vertices[i * num].y = sigma * gauss(ga, gf) + (vertices[(i + d2) * num].y +
-                                                            vertices[(i - d2) * num].y + vertices[d2 + i * num].y) /
-                                                                3.0;
-            vertices[num - 1 + i * num].y = sigma * gauss(ga, gf) +
-                                            (vertices[num - 1 + (i + d2) * num].y +
-                                                vertices[num - 1 + (i - d2) * num].y +
-                                                vertices[num - 1 - d2 + i * num].y) /
-                                                3;
-        }
-
-        for (j = d2; j < num - d2; j = j + d1)
-            for (i = d1; i < num - d2; i = i + d1)
-                vertices[i + j * num].y = sigma * gauss(ga, gf) +
-                                            (vertices[i + (j + d2) * num].y + vertices[i + (j - d2) * num].y +
-                                            vertices[i + d2 + j * num].y + vertices[i - d2 + j * num].y) /
-                                                4.0;
-        for (j = d1; j < num - d2; j = j + d1)
-            for (i = d2; i < num - d2; i = i + d1)
-                vertices[i + j * num].y = sigma * gauss(ga, gf) +
-                                            (vertices[i + (j + d2) * num].y + vertices[i + (j - d2) * num].y +
-                                            vertices[i + d2 + j * num].y + vertices[i - d2 + j * num].y) /
-                                                4.0;
-
-        d1 = (int)d1 / 2;
-        d2 = (int)d2 / 2;
-    }
-
-    // caras
-    caras.resize((num - 1) * (num - 1) * 2);
-    int c = 0;
-    for (j = 0; j < num - 1; j++)
-        for (i = 0; i < num - 1; i++)
-        {
-            caras[c]._0 = i + j * num;
-            caras[c]._2 = i + 1 + j * num;
-            caras[c]._1 = i + 1 + (j + 1) * num;
-            c = c + 1;
-            caras[c]._0 = i + j * num;
-            caras[c]._2 = i + 1 + (j + 1) * num;
-            caras[c]._1 = i + (j + 1) * num;
-            c = c + 1;
-        }
-
-    // normales
-    calcular_normales_caras();
-    calcular_normales_vertices();
-    colorear_caras();
 }
 
 _textura::_textura() {

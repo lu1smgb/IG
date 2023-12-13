@@ -50,7 +50,7 @@ struct _material {
 
 const _material TEST = _material(0.2, 0.2, 0.2, 0.8, 0.8, 0.8, 1, 1, 1, 50);
 const _material MATE_CYAN = _material(0, 0.1, 0.2, 0, 0.4, 0.8, 0, 0, 0, 0);
-const _material MATE_NEGRO = _material(0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0, 0, 0, 0);
+const _material MATE_NEGRO = _material(0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 1);
 const _material SATINADO_CYAN = _material(0, 0.7, 1, 0, 0.7, 1, 0.5, 0.5, 0.5, 10);
 const _material SATINADO_NEGRO = _material(0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 10);
 const _material BRILLANTE_CYAN = _material(0.3, 0.6, 1, 0.3, 0.6, 1, 1, 1, 1, 50);
@@ -178,7 +178,7 @@ class _cilindro : public _rotacion {
 class _esfera : public _rotacion {
     public:
         _esfera(float radio = 0.5, unsigned num_x = 10, unsigned num_y = 10, bool tapa_inferior = true, bool tapa_superior = true);
-        void calcular_normales_vertices();
+        void calcular_normales_vertices_esfera();
 };
 
 //************************************************************************
@@ -306,10 +306,4 @@ protected:
     _tren_aterrizaje tren_aterrizaje;
     _helice helice;
     _timon timon;
-};
-
-class _montana : public _triangulos3D
-{
-public:
-    _montana(int nivelmax, float sigma, float h);
 };

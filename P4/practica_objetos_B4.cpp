@@ -52,7 +52,6 @@ _rotacion rotacion;
 _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
-_montana montana(5, 2, 5);
 _cubo obj_tex;
 
 typedef enum
@@ -417,9 +416,6 @@ void draw_objects()
 	case JERARQUICO:
 		jerarquico->draw(modo, 1.0, 0.0, 0.0, 5);
 		break;
-	case MONTANA:
-		montana.draw(modo, 0.7, 0.7, 0.7, 5);
-		break;
 	case SIMPLE_TEXTURA:
 		obj_tex.draw_textura();
 		break;
@@ -535,10 +531,6 @@ void normal_key(unsigned char Tecla1, int x, int y)
 		std::cout << "Observer_angle_x: " << Observer_angle_x
 				  << "\nObserver_angle_y: " << Observer_angle_y
 				  << "\nObserver_distance: " << Observer_distance << "\n";
-		break;
-	case 'M':
-		montana = _montana(3, 0.5, 3);
-		t_objeto = MONTANA;
 		break;
 	case '`':
 		dibujar_ejes = !dibujar_ejes;
@@ -682,6 +674,7 @@ void print_controls() {
 			  << "[4]\t->\tDibujado de color aleatorio\n"
 			  << "[5]\t->\tDibujado con iluminacion plana\n"
 			  << "[6]\t->\tDibujado con iluminacion Gouraud\n"
+			  << "[7]\t->\tDibujado de objeto con textura\n"
 			  << "[P]\t->\tDibujar piramide\n"
 			  << "[C]\t->\tDibujar cubo\n"
 			  << "[T]\t->\tDibujar cono\n"
@@ -720,7 +713,7 @@ void initialize(void)
 	Back_plane = 1000;
 
 	// se incia la posicion del observador, en el eje z
-	Observer_distance = 8 * Front_plane;
+	Observer_distance = 4 * Front_plane;
 	Observer_angle_x = 30;
 	Observer_angle_y = -45;
 
@@ -840,7 +833,6 @@ int main(int argc, char *argv[])
 	rotacion.material = &SATINADO_CYAN;
 	rotacion_ply.material = &BRILLANTE_CYAN;
 	extrusion->material = &SATINADO_CYAN;
-	montana.material = &SATINADO_CYAN;
 
 	const _textura saul_goodman("./img/saul_goodman.jpg");
 	obj_tex.textura = saul_goodman;
