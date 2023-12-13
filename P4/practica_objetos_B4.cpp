@@ -842,7 +842,7 @@ int main(int argc, char *argv[])
 	extrusion->material = &SATINADO_CYAN;
 	montana.material = &SATINADO_CYAN;
 
-	const _textura saul_goodman("./img/abeto.jpg", 1U);
+	const _textura saul_goodman("./img/saul_goodman.jpg");
 	obj_tex.textura = saul_goodman;
 
 	rotacion_ply.parametros("peon.perfil", 10);

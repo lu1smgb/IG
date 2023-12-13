@@ -1025,6 +1025,16 @@ void _triangulos3D::calcular_normales_vertices()
     }
 }
 
+void _esfera::calcular_normales_vertices() {
+    cout << "eyeyey" << "\n";
+    int num_vertices = this->vertices.size();
+    this->normales_vertices.resize(num_vertices);
+    for (unsigned short i=0; i < num_vertices; i++) {
+        _vertex3f normal = this->vertices[i].normalize();
+        this->normales_vertices[i] = normal;
+    }
+}
+
 void _triangulos3D::apply_material() {
     GLfloat material_ambient[] = {material->ambiente[0], material->ambiente[1], material->ambiente[2], 1.0};     // Color difuso
     GLfloat material_diffuse[] = {material->difuso[0], material->difuso[1], material->difuso[2], 1.0};           // Color difuso
@@ -1214,10 +1224,10 @@ _textura::_textura() {
     this->image = vector<unsigned char>();
 }
 
-_textura::_textura(string path, unsigned int id) {
+_textura::_textura(string path) {
     cout << "Creando textura" << "\n";
 
-    this->id = id;
+    // this->id = id;
 
     cimg_library::CImg<unsigned char> read_image;
     read_image.load(path.c_str());
@@ -1248,7 +1258,7 @@ _textura::_textura(string path, unsigned int id) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
-                 0, GL_RGB, GL_UNSIGNED_BYTE, &read_image[0]);
+                 0, GL_RGB, GL_UNSIGNED_BYTE, &(image[0]));
 
     cout << "Fin de creacion de textura" << "\n";
 }
@@ -1260,28 +1270,31 @@ _textura::~_textura() {
 
 void _cubo::draw_textura() {
 
+    glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
+    glColor3f(1,1,1);
     glBindTexture(GL_TEXTURE_2D, this->textura.id);
     glBegin(GL_QUADS);
+    const float edge_coord = 1;
     for (unsigned short i = 0; i < caras.size(); i++) {
         if (i == 0) {
-            glTexCoord2f(1, 0);
+            glTexCoord2f(edge_coord, 0);
             glVertex3fv((GLfloat *)&vertices[4 * i + 1]);
             glTexCoord2f(0, 0);
             glVertex3fv((GLfloat *)&vertices[4 * i]);
-            glTexCoord2f(0, 1);
+            glTexCoord2f(0, edge_coord);
             glVertex3fv((GLfloat *)&vertices[4 * i + 3]);
-            glTexCoord2f(1, 1);
+            glTexCoord2f(edge_coord, edge_coord);
             glVertex3fv((GLfloat *)&vertices[4 * i + 2]);
         }
         else if (i == 1) {
             glTexCoord2f(0, 0);
             glVertex3fv((GLfloat *)&vertices[4 * i]);
-            glTexCoord2f(1, 0);
+            glTexCoord2f(edge_coord, 0);
             glVertex3fv((GLfloat *)&vertices[4 * i + 1]);
-            glTexCoord2f(1, 1);
+            glTexCoord2f(edge_coord, edge_coord);
             glVertex3fv((GLfloat *)&vertices[4 * i + 2]);
-            glTexCoord2f(0, 1);
+            glTexCoord2f(0, edge_coord);
             glVertex3fv((GLfloat *)&vertices[4 * i + 3]);
         }
         else {
@@ -1290,13 +1303,13 @@ void _cubo::draw_textura() {
             idx.w = (i - 1) % 4;
             idx.x = 4 + ((i - 1) % 4);
             idx.y = 4 + ((i - 2) % 4);
-            glTexCoord2f(0, 0);
+            glTexCoord2f(edge_coord, 0);
             glVertex3fv((GLfloat *)&vertices[idx.x]);
-            glTexCoord2f(1, 0);
+            glTexCoord2f(0, 0);
             glVertex3fv((GLfloat *)&vertices[idx.y]);
-            glTexCoord2f(1, 1);
+            glTexCoord2f(0, edge_coord);
             glVertex3fv((GLfloat *)&vertices[idx.z]);
-            glTexCoord2f(0, 1);
+            glTexCoord2f(edge_coord, edge_coord);
             glVertex3fv((GLfloat *)&vertices[idx.w]);
         }
     }

@@ -59,7 +59,7 @@ struct _textura {
     unsigned int id;
     vector<unsigned char> image;
     _textura();
-    _textura(string path, unsigned int id);
+    _textura(string path);
     ~_textura();
 };
 
@@ -70,8 +70,6 @@ protected:
     _vertex3f color_aleatorio();
     void colorear_caras_aleatorio();
     void colorear_caras();
-    void calcular_normales_caras();
-    void calcular_normales_vertices();
     void apply_material();
 public:
     _triangulos3D();
@@ -79,6 +77,9 @@ public:
     void draw_solido(float r, float g, float b);
     void draw_solido_colores();
     void draw(_modo modo, float r, float g, float b, float grosor);
+
+    void calcular_normales_caras();
+    void calcular_normales_vertices();
 
     void draw_difuse_flat(_vertex3f color);
     void draw_difuse_gouraud(_vertex3f color);
@@ -177,6 +178,7 @@ class _cilindro : public _rotacion {
 class _esfera : public _rotacion {
     public:
         _esfera(float radio = 0.5, unsigned num_x = 10, unsigned num_y = 10, bool tapa_inferior = true, bool tapa_superior = true);
+        void calcular_normales_vertices();
 };
 
 //************************************************************************
