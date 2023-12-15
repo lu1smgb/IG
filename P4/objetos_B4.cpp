@@ -1159,6 +1159,9 @@ _textura::~_textura() {
 
 void _cubo::draw_textura() {
 
+    glPushMatrix();
+    glTranslatef(-1, 0, 0);
+
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
     glColor3f(1,1,1);
@@ -1168,23 +1171,23 @@ void _cubo::draw_textura() {
     for (unsigned short i = 0; i < caras.size(); i++) {
         if (i == 0) {
             glTexCoord2f(edge_coord, 0);
-            glVertex3fv((GLfloat *)&vertices[4 * i + 1]);
+            glVertex3fv((GLfloat *)&vertices[1]);
             glTexCoord2f(0, 0);
-            glVertex3fv((GLfloat *)&vertices[4 * i]);
+            glVertex3fv((GLfloat *)&vertices[0]);
             glTexCoord2f(0, edge_coord);
-            glVertex3fv((GLfloat *)&vertices[4 * i + 3]);
+            glVertex3fv((GLfloat *)&vertices[3]);
             glTexCoord2f(edge_coord, edge_coord);
-            glVertex3fv((GLfloat *)&vertices[4 * i + 2]);
+            glVertex3fv((GLfloat *)&vertices[2]);
         }
         else if (i == 1) {
-            glTexCoord2f(0, 0);
-            glVertex3fv((GLfloat *)&vertices[4 * i]);
             glTexCoord2f(edge_coord, 0);
-            glVertex3fv((GLfloat *)&vertices[4 * i + 1]);
-            glTexCoord2f(edge_coord, edge_coord);
-            glVertex3fv((GLfloat *)&vertices[4 * i + 2]);
+            glVertex3fv((GLfloat *)&vertices[6]);
+            glTexCoord2f(0, 0);
+            glVertex3fv((GLfloat *)&vertices[7]);
             glTexCoord2f(0, edge_coord);
-            glVertex3fv((GLfloat *)&vertices[4 * i + 3]);
+            glVertex3fv((GLfloat *)&vertices[4]);
+            glTexCoord2f(edge_coord, edge_coord);
+            glVertex3fv((GLfloat *)&vertices[5]);
         }
         else {
             _vertex4ui idx;
@@ -1206,12 +1209,13 @@ void _cubo::draw_textura() {
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
 
+    glPopMatrix();
 }
 
 void _piramide::draw_textura() {
 
     glPushMatrix();
-    glTranslatef(-1, 0, -1);
+    glTranslatef(1, 0, 0);
 
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
@@ -1219,13 +1223,13 @@ void _piramide::draw_textura() {
     glBindTexture(GL_TEXTURE_2D, this->textura.id);
     glBegin(GL_QUADS);
     glTexCoord2f(0, 0);
-    glVertex3fv((GLfloat *)&vertices[0]);
-    glTexCoord2f(1, 0);
-    glVertex3fv((GLfloat *)&vertices[1]);
-    glTexCoord2f(1, 1);
-    glVertex3fv((GLfloat *)&vertices[2]);
-    glTexCoord2f(0, 1);
     glVertex3fv((GLfloat *)&vertices[3]);
+    glTexCoord2f(1, 0);
+    glVertex3fv((GLfloat *)&vertices[2]);
+    glTexCoord2f(1, 1);
+    glVertex3fv((GLfloat *)&vertices[1]);
+    glTexCoord2f(0, 1);
+    glVertex3fv((GLfloat *)&vertices[0]);
     glEnd();
     
     glBegin(GL_TRIANGLES);

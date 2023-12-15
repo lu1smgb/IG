@@ -836,11 +836,9 @@ int main(int argc, char *argv[])
 	rotacion_ply.material = &BRILLANTE_CYAN;
 	extrusion->material = &SATINADO_CYAN;
 
-	const _textura tex_agua("./img/agua.jpg");
-	const _textura tex_abeto("./img/abeto.jpg");
-
-	obj_tex.textura = tex_agua;
-	obj_tex2.textura = tex_abeto;
+	const _textura mi_textura("./img/saul_goodman.jpg");
+	obj_tex.textura = mi_textura;
+	obj_tex2.textura = mi_textura;
 
 	rotacion_ply.parametros("peon.perfil", 10);
 
