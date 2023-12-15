@@ -53,6 +53,7 @@ _rotacion_ply rotacion_ply;
 _extrusion *extrusion;
 _avion *jerarquico = new _avion(0, 0, 0);
 _cubo obj_tex;
+_piramide obj_tex2;
 
 typedef enum
 {
@@ -418,6 +419,7 @@ void draw_objects()
 		break;
 	case SIMPLE_TEXTURA:
 		obj_tex.draw_textura();
+		obj_tex2.draw_textura();
 		break;
 	}
 }
@@ -834,8 +836,9 @@ int main(int argc, char *argv[])
 	rotacion_ply.material = &BRILLANTE_CYAN;
 	extrusion->material = &SATINADO_CYAN;
 
-	const _textura saul_goodman("./img/saul_goodman.jpg");
-	obj_tex.textura = saul_goodman;
+	const _textura mi_textura("./img/saul_goodman.jpg");
+	obj_tex.textura = mi_textura;
+	obj_tex2.textura = mi_textura;
 
 	rotacion_ply.parametros("peon.perfil", 10);
 

@@ -1207,3 +1207,39 @@ void _cubo::draw_textura() {
     glDisable(GL_TEXTURE_2D);
 
 }
+
+void _piramide::draw_textura() {
+
+    glPushMatrix();
+    glTranslatef(-1, 0, -1);
+
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    glColor3f(1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, this->textura.id);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex3fv((GLfloat *)&vertices[0]);
+    glTexCoord2f(1, 0);
+    glVertex3fv((GLfloat *)&vertices[1]);
+    glTexCoord2f(1, 1);
+    glVertex3fv((GLfloat *)&vertices[2]);
+    glTexCoord2f(0, 1);
+    glVertex3fv((GLfloat *)&vertices[3]);
+    glEnd();
+    
+    glBegin(GL_TRIANGLES);
+    for (unsigned short i=0; i < 4; i++) {
+        glTexCoord2f(0, 1);
+        glVertex3fv((GLfloat *)&vertices[i]);
+        glTexCoord2f(1, 1);
+        glVertex3fv((GLfloat *)&vertices[((i + 1) % 4)]);
+        glTexCoord2f(0.5, 0);
+        glVertex3fv((GLfloat *)&vertices[4]);
+    }
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+
+    glPopMatrix();
+}
